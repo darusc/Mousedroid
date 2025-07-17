@@ -7,7 +7,13 @@ import androidx.core.view.GestureDetectorCompat
 import com.example.mousedroid.networking.Connection
 import com.example.mousedroid.networking.ConnectionManager
 
+/**
+ * Class that handles simples gestures (tap, long press, scroll) using
+ * a GestureDetectorCompat
+ */
 class GestureHandler(context: Context): GestureDetector.SimpleOnGestureListener() {
+
+    private val TAG = "Mousedroid"
 
     private val connectionManager = ConnectionManager.getInstance()
     val detector: GestureDetectorCompat = GestureDetectorCompat(context, this)
@@ -17,12 +23,10 @@ class GestureHandler(context: Context): GestureDetector.SimpleOnGestureListener(
     var scrolled = false
     var lastScrolled: Long = 0
     var isLongPressed = false
-    var isMovingAfterLongPress = false
+    var isDragging = false
 
-    private val TAG = "Mousedroid"
-
-    fun bindView(_view: View){
-        view = _view.findViewById(R.id.touchpadFragment)
+    fun bindView(view: View) {
+        this.view = view
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -48,12 +52,21 @@ class GestureHandler(context: Context): GestureDetector.SimpleOnGestureListener(
         distanceY: Float
     ): Boolean {
         if(e1.pointerCount == 1 && e2.pointerCount == 1 && System.currentTimeMillis() - lastScrolled > 500) {
-            connectionManager.sendBytes(byteArrayOf(Input.MOVE, distanceX.toInt().coerceIn(-128, 127).toByte(), distanceY.toInt().coerceIn(-128, 127).toByte()), true)
+            connectionManager.sendBytes(
+                byteArrayOf(
+                    Input.MOVE,
+                    distanceX.toInt().coerceIn(-128, 127).toByte(),
+                    distanceY.toInt().coerceIn(-128, 127).toByte()),
+                true)
             println(distanceX)
             println(distanceY)
         }
         else {
-            connectionManager.sendBytes(byteArrayOf(Input.SCROLL, (-distanceY).toInt().coerceIn(-128, 127).toByte()), true)
+            connectionManager.sendBytes(
+                byteArrayOf(
+                    Input.SCROLL,
+                    (-distanceY).toInt().coerceIn(-128, 127).toByte()),
+                true)
             scrolled = true
             lastScrolled = System.currentTimeMillis()
         }

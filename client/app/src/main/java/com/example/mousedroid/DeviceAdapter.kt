@@ -10,31 +10,20 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.ArrayList
 
 class DeviceAdapter(
-    context: Context?,
-    devices: ArrayList<Pair<String, String>>,
-    listener: OnItemClickListener
-) :
-    RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
-
-    private var devices: ArrayList<Pair<String, String>>
-    private var context: Context?
-    private var listener: OnItemClickListener
-
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var wrapper: ConstraintLayout = view.findViewById(R.id.deviceWrapper)
-        var device_name: TextView = view.findViewById(R.id.device_name)
-        var device_address: TextView = view.findViewById(R.id.device_address)
-    }
+    private val context: Context?,
+    private val devices: ArrayList<Pair<String, String>>,
+    private val listener: OnItemClickListener
+) : RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
 
     interface OnItemClickListener {
         fun onItemClick(address: String)
         fun onItemLongClick(position: Int)
     }
 
-    init {
-        this.devices = devices
-        this.context = context
-        this.listener = listener
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var wrapper: ConstraintLayout = view.findViewById(R.id.deviceWrapper)
+        var deviceName: TextView = view.findViewById(R.id.device_name)
+        var deviceAddress: TextView = view.findViewById(R.id.device_address)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -47,8 +36,8 @@ class DeviceAdapter(
         val name = devices[position].first
         val address = devices[position].second
 
-        vh.device_name.text = name
-        vh.device_address.text = address
+        vh.deviceName.text = name
+        vh.deviceAddress.text = address
 
         vh.wrapper.setOnClickListener {
             listener.onItemClick(address)

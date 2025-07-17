@@ -3,7 +3,6 @@ package com.example.mousedroid
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
@@ -14,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.example.mousedroid.networking.ConnectionManager
 
 class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
+
     private lateinit var softinputView: EditText
     private val connectionManager = ConnectionManager.getInstance(this)
 
@@ -39,10 +39,12 @@ class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         }
 
         findViewById<CheckBox>(R.id.openNumpad).setOnCheckedChangeListener { compoundButton: CompoundButton, checked: Boolean ->
-            if (checked)
+            if (checked) {
                 changeActiveInputFragment(NumpadFragment())
-            else
+            }
+            else {
                 changeActiveInputFragment(TouchpadFragment(baseContext))
+            }
         }
 
         changeActiveInputFragment(TouchpadFragment(baseContext))
@@ -54,8 +56,7 @@ class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     }
 
     private fun changeActiveInputFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
-            .commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
     }
 
     fun numpadButtonClickListener(view: View) = NumpadFragment.onNumpadButtonClickListener(view)

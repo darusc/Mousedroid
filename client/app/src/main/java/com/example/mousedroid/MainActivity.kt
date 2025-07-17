@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.BatteryManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Build
@@ -16,12 +15,12 @@ import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import com.example.mousedroid.networking.ConnectionManager
 import com.example.mousedroid.networking.ConnectionManager.Mode
 import com.google.android.material.button.MaterialButton
-import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
 
@@ -32,6 +31,24 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
 
     private var deviceDetails: String = ""
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S_V2) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "REQUESTING PERMISSION")
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 100)
+            }
+            else {
+                init((baseContext.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter.name)
+            }
+        } else {
+            init(Settings.Secure.getString(contentResolver, "bluetooth_name"))
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -52,9 +69,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     private fun init(deviceName: String) {
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
-
         val connectionMode = getConnectionMode()
-//        TcpClient.init(manufacturer, deviceName, model, connectionMode)
 
         deviceDetails = "$manufacturer/$deviceName/$model/$connectionMode"
 
@@ -64,11 +79,11 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         }
 
         findViewById<MaterialButton>(R.id.retryButton).setOnClickListener {
-            if(connectionMode == Mode.USB){
+            if(getConnectionMode() == Mode.USB) {
                 finish()
                 startActivity(intent)
             }
-            else{
+            else {
                 findViewById<ConstraintLayout>(R.id.errorPanel).visibility = View.GONE
                 findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.VISIBLE
                 resultLauncher.launch(Intent(this, SelectDeviceActivity::class.java))
@@ -80,25 +95,6 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
             findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.GONE
             resultLauncher.launch(Intent(this, SelectDeviceActivity::class.java))
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S_V2) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "REQUESTING PERMISSION")
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 100)
-            }
-            else {
-                init((baseContext.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter.name)
-            }
-        } else {
-            init(Settings.Secure.getString(contentResolver, "bluetooth_name"))
-        }
-
-        //val deviceName = Settings.Global.getString(application.contentResolver, Settings.Global.DEVICE_NAME)
     }
 
     override fun onResume() {
@@ -146,14 +142,10 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     }
 
     private fun getConnectionMode(): Mode {
-        val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        val batteryStatus = baseContext.registerReceiver(null, ifilter)
-
-        val isPluggedIn = batteryStatus?.getIntExtra(
-            BatteryManager.EXTRA_PLUGGED,
-            -1
-        ) == BatteryManager.BATTERY_PLUGGED_USB
-
-        return if(isPluggedIn) Mode.USB else Mode.WIFI
+        val intent = applicationContext.registerReceiver(
+            null,
+            IntentFilter("android.hardware.usb.action.USB_STATE")
+        )
+        return if(intent?.getBooleanExtra("connected", false) == true) Mode.USB else Mode.WIFI
     }
 }
