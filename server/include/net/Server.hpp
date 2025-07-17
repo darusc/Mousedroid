@@ -64,7 +64,7 @@ private:
 	const INPUT_MANAGER& inputmanager;
 	const ConnectionListener& connectionListener;
 
-	unsigned char* byteBuffer;
+	char* byteBuffer;
 
 	//asio::executor_work_guard<asio::io_context::executor_type> guard;
 	asio::io_context context;
@@ -75,7 +75,6 @@ private:
 
 	std::thread thread;
 
-	int streamingDevice;
 	std::vector<std::shared_ptr<Connection>> connections;
 
 	void TCPDoAccept();

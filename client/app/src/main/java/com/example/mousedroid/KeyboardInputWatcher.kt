@@ -3,14 +3,15 @@ package com.example.mousedroid
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
+import com.example.mousedroid.networking.ConnectionManager
 
 class KeyboardInputWatcher(editText: EditText): TextWatcher {
+
+    private val connectionManager = ConnectionManager.getInstance()
 
     private val TAG = "Mousedroid"
 
     private var ignoreChange = false
-
-    private val KEY_PRESS = 7
 
     private val edittext: EditText = editText
 
@@ -23,7 +24,7 @@ class KeyboardInputWatcher(editText: EditText): TextWatcher {
     override fun onTextChanged(text: CharSequence, start: Int, lengthBefore: Int, lengthAfter: Int) {
         if(!ignoreChange){
             if(lengthAfter < lengthBefore){
-                TcpClient.write(KEY_PRESS, 127) // DEL
+                connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, 127), true) // DEL
                 if(start == 1 && lengthAfter == 0){
                     edittext.reset()
                 }
@@ -31,15 +32,16 @@ class KeyboardInputWatcher(editText: EditText): TextWatcher {
             else {
                 val c = if(text.isNotEmpty()) text[text.length - 1] else null
                 if(c == '\n'){
-                    TcpClient.write(KEY_PRESS, 10) // \n
+                    connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, 10), true) // \n
                     edittext.reset()
                 }
                 else{
                     if(lengthAfter == lengthBefore + 1){
-                        sendCharBuffer(text[text.length - 1].toString())
+                        connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, text[text.length - 1].code.toByte()), true)
                     }
                     else{
-                        sendCharBuffer(text.substring(start))
+                        val bytes = text.substring(start).map { it.code.toByte() }.toByteArray()
+                        connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, *bytes), true)
                     }
                 }
             }
@@ -53,10 +55,5 @@ class KeyboardInputWatcher(editText: EditText): TextWatcher {
         edittext.setText("//")
         edittext.setSelection(edittext.length())
         ignoreChange = false
-    }
-
-    private fun sendCharBuffer(string: String){
-        val out = string.map { it.code }.toIntArray()
-        TcpClient.write(KEY_PRESS, *out.toTypedArray())
     }
 }

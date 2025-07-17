@@ -10,8 +10,7 @@ Server::Server(int port, const ConnectionListener& connectionListener, SettingsM
 	acceptor(tcp::acceptor(context, tcp::endpoint(tcp::v4(), port))),
 	udpsocket(context, udp::endpoint(asio::ip::udp::v4(), port))
 {
-	byteBuffer = new unsigned char[10];
-	streamingDevice = 0;
+	byteBuffer = new char[Connection::MAX_BUFFER_SIZE];
 	settings.ADBOn();
 	StartReceive();
 }
@@ -111,10 +110,10 @@ void Server::TCPDoAccept()
 
 void Server::StartReceive()
 {
-	udpsocket.async_receive_from(asio::buffer(byteBuffer, 10), remote_endpoint, [&](const std::error_code& ec, size_t bytesReceived) {
+	udpsocket.async_receive_from(asio::buffer(byteBuffer, Connection::MAX_BUFFER_SIZE), remote_endpoint, [&](const std::error_code& ec, size_t bytesReceived) {
 		if (!ec)
 		{
-			// inputmanager.execute(byteBuffer...)
+			inputmanager.execute(byteBuffer, bytesReceived);
 
 			// Mechanism to synchronize the server with the client
 			// otherwise client might send the next segment of the 

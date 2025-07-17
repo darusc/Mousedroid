@@ -21,7 +21,7 @@ Connection::Connection(const INPUT_MANAGER& inputmanager, tcp::socket socket, st
 	deviceInfo.ctype = std::atoi(tokens[3].c_str());
 	deviceInfo.Address = this->socket.remote_endpoint().address().to_string();
 
-	byteBuffer = new unsigned char[10];
+	byteBuffer = new char[MAX_BUFFER_SIZE];
 	active = false;
 	Read();
 }
@@ -33,10 +33,10 @@ DeviceInfo Connection::GetDeviceInfo()
 
 void Connection::Read()
 {
-	socket.async_read_some(asio::buffer(byteBuffer, 10), [this](asio::error_code ec, size_t bytes) {
+	socket.async_read_some(asio::buffer(byteBuffer, MAX_BUFFER_SIZE), [this](asio::error_code ec, size_t bytes) {
 		if (!ec)
 		{
-			// inputmanager.execute(byteBuffer...)
+			inputmanager.execute(byteBuffer, bytes);
 			Read();
 		}
 		else

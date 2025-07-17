@@ -5,12 +5,14 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import com.example.mousedroid.networking.Connection
+import com.example.mousedroid.networking.ConnectionManager
 
 class TouchpadFragment(context: Context) : Fragment(), View.OnTouchListener {
 
+    private val connectionManager = ConnectionManager.getInstance()
     private var gestureHandler: GestureHandler = GestureHandler(context)
     private val TAG = "Mousedroid"
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +23,7 @@ class TouchpadFragment(context: Context) : Fragment(), View.OnTouchListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
 
         val view = inflater.inflate(R.layout.touchpad_fragment, container, false)
 
@@ -35,7 +37,7 @@ class TouchpadFragment(context: Context) : Fragment(), View.OnTouchListener {
     override fun onTouch(p0: View?, p1: MotionEvent): Boolean {
         if(p1.actionMasked == MotionEvent.ACTION_POINTER_UP && p1.pointerCount == 2){
             if(!gestureHandler.scrolled && System.currentTimeMillis() - gestureHandler.lastScrolled > 500){
-                TcpClient.write(GestureHandler.RIGHT_CLICK)
+                connectionManager.sendBytes(byteArrayOf(Input.RCLICK), true)
             }
             else{
                 gestureHandler.scrolled = false
@@ -61,7 +63,8 @@ class TouchpadFragment(context: Context) : Fragment(), View.OnTouchListener {
                 if(gestureHandler.isLongPressed || gestureHandler.isMovingAfterLongPress){
                     gestureHandler.isMovingAfterLongPress = false
                     gestureHandler.isLongPressed = false
-                    TcpClient.write(GestureHandler.UP)
+                    //TcpClient.write(GestureHandler.UP)
+                    connectionManager.sendBytes(byteArrayOf(Input.UP), true)
                 }
             }
         }

@@ -229,12 +229,20 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
     }
 
-    fun sendBytes(bytes: ByteArray) {
+    fun sendBytes(bytes: ByteArray, withCoroutine: Boolean = false) {
         if(connection == null) {
             return;
         }
 
-        connection.send(bytes);
+        bytes.forEach {
+            print(it)
+        }
+        println()
+
+        when(withCoroutine) {
+            false -> connection.send(bytes)
+            true -> CoroutineScope(Dispatchers.IO).launch { connection.send(bytes) }
+        }
     }
 
     override fun onBytesReceived(buffer: ByteArray, bytes: Int) {
