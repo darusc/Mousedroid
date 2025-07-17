@@ -14,7 +14,7 @@ wxDeviceList::wxDeviceList(wxWindow *parent, int id): wxListView(parent, id, wxD
     this->AppendColumn("Model", wxLIST_FORMAT_LEFT);
 }
 
-void wxDeviceList::InsertDevice(int i, Device &device)
+void wxDeviceList::InsertDevice(int i, DeviceInfo &device)
 {
     std::string conn = (device.ctype == USB) ? "USB" : "WIFI";
 
@@ -43,7 +43,14 @@ void wxDeviceList::UpdateView(bool refresh /*=false*/)
     }
 }
 
-void wxDeviceList::AddDevice(Device device)
+void wxDeviceList::SetDevices(const std::vector<DeviceInfo> &devs)
+{
+    devices.clear();
+    std::copy(devs.begin(), devs.end(), std::back_inserter(devices));
+    UpdateView(true);
+}
+
+void wxDeviceList::AddDevice(DeviceInfo device)
 {
     devices.push_back(device);
     UpdateView();

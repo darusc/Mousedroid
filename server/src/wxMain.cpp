@@ -4,7 +4,7 @@
 
 wxBEGIN_EVENT_TABLE(wxMain, wxFrame)
     EVT_ICONIZE(wxMain::HideWindow)
-    EVT_CLOSE(wxMain::CloseWindow)
+    //EVT_CLOSE(wxMain::CloseWindow)
     EVT_CHECKBOX(CHK_STARTUP, wxMain::CheckboxCmdHandler)
     EVT_CHECKBOX(CHK_MINTASK, wxMain::CheckboxCmdHandler)
     EVT_COMMAND_SCROLL(SL_MOVE, wxMain::SliderCmdHandler)
@@ -179,15 +179,17 @@ void wxMain::SetHostInfo(std::string _Hostname, std::string _IpAddress)
     ((wxStaticText*)FindWindowById(HOST_IP_TXT))->SetLabelText(_IpAddress);
 }
 
-void wxMain::CloseWindow(wxCloseEvent &evt)
-{
-    wxMessageDialog *box = new wxMessageDialog(this, "This will disconnect all connected devices. Proceed?", "Confirm", wxYES_NO | wxICON_INFORMATION);
+// void wxMain::CloseWindow(wxCloseEvent &evt)
+// {
+//     wxMessageDialog *box = new wxMessageDialog(this, "This will disconnect all connected devices. Proceed?", "Confirm", wxYES_NO | wxICON_INFORMATION);
 
-    int res = box->ShowModal();
+//     int res = box->ShowModal();
 
-    if(res == wxID_YES)
-        evt.Skip();
-}
+//     if(res == wxID_YES)
+//         evt.Skip();
+//     else
+//         evt.Veto();
+// }
 
 void wxMain::HideWindow(wxIconizeEvent &evt)
 {
