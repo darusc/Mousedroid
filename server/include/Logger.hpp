@@ -8,6 +8,7 @@
 #include <chrono>
 #include <iomanip>
 #include <time.h>
+#include <fstream>
 
 #define LOG(args...) Logger::log(args)
 
@@ -17,6 +18,7 @@ namespace Logger
     extern wxListView *monitor;
 
     extern std::stringstream output;
+    extern std::ofstream fileoutstream;
 
     void displayOutput();
     
