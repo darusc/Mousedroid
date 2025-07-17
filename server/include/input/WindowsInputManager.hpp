@@ -57,22 +57,22 @@ namespace InputManager
                 {(char)127, VK_BACK, false} // BACKSPACE
             };
             
-            std::pair<int, bool> getFromKeyMap(char c) override;
+            std::pair<int, bool> getFromKeyMap(char c) const override;
 
         private:
             /**
              * Transforms a char to a win32 keycode
              * https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
              */
-            int parse_char(char c, bool &shiftPressed) override;
+            int parse_char(char c, bool &shiftPressed) const override;
 
-            virtual void click() override;
-            virtual void right_click() override;
-            virtual void move(int dx, int dy) override;
-            virtual void scroll(int dy) override;
-            virtual void down() override;
-            virtual void up() override;
-            virtual void send_key(char c) override;
+            virtual void click() const override;
+            virtual void right_click() const override;
+            virtual void move(int dx, int dy) const override;
+            virtual void scroll(int dy) const override;
+            virtual void down() const override;
+            virtual void up() const override;
+            virtual void send_key(char c) const override;
     };
 }
 

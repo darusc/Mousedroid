@@ -99,17 +99,17 @@ namespace InputManager
              * Transforms a char to a unix keycode
              * https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
              */
-            int parse_char(char c, bool &shiftPressed);
+            int parse_char(char c, bool &shiftPressed) const override;
 
-            void emit(int fd, int type, int code, int val);
+            void emit(int fd, int type, int code, int val) const;
 
-            void click() override;
-            void right_click() override;
-            void move(int dx, int dy) override;
-            void scroll(int scroll_amount) override;
-            void down() override;
-            void up() override;
-            void send_key(char c) override;
+            void click() const override;
+            void right_click() const override;
+            void move(int dx, int dy) const override;
+            void scroll(int scroll_amount) const override;
+            void down() const override;
+            void up() const override;
+            void send_key(char c) const override;
     };
 }
 

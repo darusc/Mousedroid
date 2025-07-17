@@ -10,7 +10,7 @@ namespace InputManager
     Windows::Windows() { }
     Windows::~Windows() { }
 
-    std::pair<int, bool> Windows::getFromKeyMap(char c)
+    std::pair<int, bool> Windows::getFromKeyMap(char c) const
     {
         for(auto k : KEYMAP)
         {
@@ -21,7 +21,7 @@ namespace InputManager
         return {0, 0};
     }
 
-    int Windows::parse_char(char c, bool &shiftPressed)
+    int Windows::parse_char(char c, bool &shiftPressed) const
     {
         shiftPressed = false;
 
@@ -45,7 +45,7 @@ namespace InputManager
         }
     }
 
-    void Windows::click()
+    void Windows::click() const
     {
         INPUT input = {};
         ZeroMemory(&input, sizeof(input));
@@ -55,7 +55,7 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::right_click()
+    void Windows::right_click() const
     {
         INPUT input;
         ZeroMemory(&input, sizeof(input));
@@ -65,8 +65,9 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::move(int dx, int dy)
+    void Windows::move(int dx, int dy) const
     {
+        LOG("MOVE: dx=", dx, ", dy=", dy, " (sensitivity: ", MOVE_SENSITIVITY, ")");
         INPUT input = {};
         ZeroMemory(&input, sizeof(input));
         input.type = INPUT_MOUSE;
@@ -77,7 +78,7 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::scroll(int scroll_amount)
+    void Windows::scroll(int scroll_amount) const
     {
         INPUT input = {};
         ZeroMemory(&input, sizeof(input));
@@ -88,7 +89,7 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::down()
+    void Windows::down() const
     {
         INPUT input = {};
         ZeroMemory(&input, sizeof(input));
@@ -98,7 +99,7 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::up()
+    void Windows::up() const
     {
         INPUT input = {};
         ZeroMemory(&input, sizeof(input));
@@ -108,7 +109,7 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::send_key(char c)
+    void Windows::send_key(char c) const
     {
         INPUT inputs[4] = {};
         ZeroMemory(inputs, sizeof(inputs));

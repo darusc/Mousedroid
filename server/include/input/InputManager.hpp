@@ -9,21 +9,24 @@
     #include <climits>
 #endif
 
+#include "Logger.hpp"
+
 namespace InputManager
 {
     struct Command 
     {
-        int type;
+        char type;
         std::vector<double> args;
     };   
 
-    const int CLICK = 1;
-    const int RIGHT_CLICK = 2;
-    const int DOWN = 3;
-    const int UP = 4;
-    const int MOVE = 5;
-    const int SCROLL = 6;
-    const int KEY_PRESS = 7;
+    const char LCLICK = 0x01;
+    const char RCLICK = 0x02;
+    const char DOWN = 0x03;
+    const char UP = 0x04;
+    const char MOVE = 0x05;
+    const char SCROLL = 0x06;
+    const char KEYPRESS = 0x07;
+    const char NUMPAD = 0x08;
 
     extern int MOVE_SENSITIVITY;
     extern int SCROLL_SENSITIVITY;
@@ -42,61 +45,24 @@ namespace InputManager
     class Base
     {
         public:
-            void execute(std::string message)
+            void execute(const char* bytes, size_t size) const
             {
-                Command cmd = parse_message(message);
-                exec_command(cmd);
-            }
-
-            virtual std::pair<int, bool> getFromKeyMap(char c) = 0;
-
-        private:
-            /**
-             * @brief Parse the message received from client to a command that will be executed
-             * @param in 
-             * @return Command 
-             */
-            Command parse_message(std::string in)
-            {
-                Command cmd;
-                size_t pos = 0;
-
-                cmd.type = in[0] - '0'; 
-                in = in.substr(2);
-
-                std::istringstream sstream(in);
-                std::string tok;
-
-                int i = 0;
-                int l = cmd.type < 8 ? 2 : INT_MAX;
-
-                while(std::getline(sstream, tok, '_') && i < l)
-                {
-                    cmd.args.push_back(std::atof(tok.c_str()));
-                    i++;
-                }
-
-                return cmd;
-            }
-
-            void exec_command(Command cmd)
-            {
-                switch(cmd.type)
+                switch(bytes[0])
                 {
                     case InputManager::MOVE:
-                        move(-(int)cmd.args[0], -(int)cmd.args[1]);
+                        move(-(int)bytes[1], -(int)bytes[2]);
                         break;
                     
-                    case InputManager::CLICK:
+                    case InputManager::LCLICK:
                         click();
                         break;
 
-                    case InputManager::RIGHT_CLICK:
+                    case InputManager::RCLICK:
                         right_click();
                         break;
 
                     case InputManager::SCROLL:
-                        scroll(cmd.args[0]);
+                        scroll(bytes[1]);
                         break;
 
                     case InputManager::DOWN:
@@ -107,23 +73,24 @@ namespace InputManager
                         up();
                         break;
 
-                    case InputManager::KEY_PRESS:
-                        for(int c : cmd.args)
-                        {
-                            send_key(c);
-                        }
+                    case InputManager::KEYPRESS:
+                        for(int i = 1; i < size; i++)
+                            send_key(bytes[i]);
                         break;
                 }
             }
 
-            virtual int parse_char(char c, bool &shiftPressed) = 0;
+            virtual std::pair<int, bool> getFromKeyMap(char c) const = 0;
 
-            virtual void click() = 0;
-            virtual void right_click() = 0;
-            virtual void move(int dx, int dy) = 0;
-            virtual void scroll(int dy) = 0;
-            virtual void down() = 0;
-            virtual void up() = 0;
-            virtual void send_key(char c) = 0;
+        private:
+            virtual int parse_char(char c, bool &shiftPressed) const = 0;
+
+            virtual void click() const = 0;
+            virtual void right_click() const = 0;
+            virtual void move(int dx, int dy) const = 0;
+            virtual void scroll(int dy) const = 0;
+            virtual void down() const = 0;
+            virtual void up() const  = 0;
+            virtual void send_key(char c) const = 0;
     };
 }
