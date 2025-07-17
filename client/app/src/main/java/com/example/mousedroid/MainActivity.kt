@@ -18,14 +18,19 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
+import com.example.mousedroid.networking.ConnectionManager
+import com.example.mousedroid.networking.ConnectionManager.Mode
 import com.google.android.material.button.MaterialButton
 import org.w3c.dom.Text
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
 
     private val TAG = "Mousedroid"
 
+    private var connectionManager = ConnectionManager.getInstance(this)
     private lateinit var inputActivityIntent: Intent
+
+    private var deviceDetails: String = ""
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -49,52 +54,24 @@ class MainActivity : AppCompatActivity() {
         val model = Build.MODEL
 
         val connectionMode = getConnectionMode()
-        TcpClient.init(manufacturer, deviceName, model, connectionMode)
+//        TcpClient.init(manufacturer, deviceName, model, connectionMode)
 
-        TcpClient.addOnConnectionEstablishedListener {
-            inputActivityIntent = Intent(this, InputActivity::class.java)
-            startActivity(inputActivityIntent)
-        }
-
-        TcpClient.addOnConnectionLostListener {
-            runOnUiThread{
-                findViewById<ConstraintLayout>(R.id.errorPanel).visibility = View.VISIBLE
-                findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.GONE
-                findViewById<TextView>(R.id.errorName).text = getString(R.string.connectionLost)
-                findViewById<TextView>(R.id.errorDetail).text = ""
-            }
-        }
-
-        TcpClient.addOnConnectionFailedListener {
-            runOnUiThread {
-                findViewById<ConstraintLayout>(R.id.errorPanel).visibility = View.VISIBLE
-                findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.GONE
-
-                if(connectionMode == TcpClient.USB) {
-                    findViewById<MaterialButton>(R.id.selectAnotherDeviceButton).visibility = View.GONE
-                    findViewById<TextView>(R.id.errorDetail).text = getString(R.string.connectionFailedUSB)
-                }
-                else{
-                    findViewById<TextView>(R.id.errorName).text = getString(R.string.connectionFailed)
-                    findViewById<TextView>(R.id.errorDetail).text = getString(R.string.connectionFailedWIFI)
-                }
-            }
-        }
+        deviceDetails = "$manufacturer/$deviceName/$model/$connectionMode"
 
         when(connectionMode) {
-            TcpClient.USB -> TcpClient.connect("localhost")
-            TcpClient.WIFI -> resultLauncher.launch(Intent(this, SelectDeviceActivity::class.java))
+            Mode.USB -> connectionManager.connect(6969, deviceDetails)
+            Mode.WIFI -> resultLauncher.launch(Intent(this, SelectDeviceActivity::class.java))
         }
 
         findViewById<MaterialButton>(R.id.retryButton).setOnClickListener {
-            if(connectionMode == TcpClient.USB){
+            if(connectionMode == Mode.USB){
                 finish()
                 startActivity(intent)
             }
             else{
                 findViewById<ConstraintLayout>(R.id.errorPanel).visibility = View.GONE
                 findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.VISIBLE
-                TcpClient.connect()
+                resultLauncher.launch(Intent(this, SelectDeviceActivity::class.java))
             }
         }
 
@@ -124,14 +101,51 @@ class MainActivity : AppCompatActivity() {
         //val deviceName = Settings.Global.getString(application.contentResolver, Settings.Global.DEVICE_NAME)
     }
 
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if(result.resultCode == Activity.RESULT_OK){
-            val ip = result.data?.getStringExtra("result").toString()
-            TcpClient.connect(ip)
+    override fun onResume() {
+        super.onResume()
+        connectionManager = ConnectionManager.getInstance(this)
+    }
+
+    override fun onConnectionSuccessful(connectionMode: Mode) {
+        inputActivityIntent = Intent(this, InputActivity::class.java)
+        inputActivtyResultLauncher.launch(inputActivityIntent)
+    }
+
+    override fun onConnectionFailed(connectionMode: Mode) {
+        runOnUiThread {
+            findViewById<ConstraintLayout>(R.id.errorPanel).visibility = View.VISIBLE
+            findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.GONE
+
+            if(connectionMode == Mode.USB) {
+                findViewById<MaterialButton>(R.id.selectAnotherDeviceButton).visibility = View.GONE
+                findViewById<TextView>(R.id.errorDetail).text = getString(R.string.connectionFailedUSB)
+            }
+            else{
+                findViewById<TextView>(R.id.errorName).text = getString(R.string.connectionFailed)
+                findViewById<TextView>(R.id.errorDetail).text = getString(R.string.connectionFailedWIFI)
+            }
         }
     }
 
-    private fun getConnectionMode(): Int {
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == Activity.RESULT_OK){
+            val ip = result.data?.getStringExtra("result").toString()
+            connectionManager.connect(ip, 6969, deviceDetails)
+        }
+    }
+
+    // Handle connection disconnect event trough result from the input activity
+    // as it is not safe to perform UI operations on the suspended main activity
+    private var inputActivtyResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == Activity.RESULT_OK) {
+            findViewById<ConstraintLayout>(R.id.errorPanel).visibility = View.VISIBLE
+            findViewById<RelativeLayout>(R.id.loadingPanel).visibility = View.GONE
+            findViewById<TextView>(R.id.errorName).text = getString(R.string.connectionLost)
+            findViewById<TextView>(R.id.errorDetail).text = ""
+        }
+    }
+
+    private fun getConnectionMode(): Mode {
         val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         val batteryStatus = baseContext.registerReceiver(null, ifilter)
 
@@ -140,6 +154,6 @@ class MainActivity : AppCompatActivity() {
             -1
         ) == BatteryManager.BATTERY_PLUGGED_USB
 
-        return if(isPluggedIn) TcpClient.USB else TcpClient.WIFI
+        return if(isPluggedIn) Mode.USB else Mode.WIFI
     }
 }
