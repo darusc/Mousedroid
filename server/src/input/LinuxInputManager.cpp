@@ -37,7 +37,7 @@ namespace InputManager
         sleep(1);
     }
 
-    void Linux::emit(int fd, int type, int code, int val)
+    void Linux::emit(int fd, int type, int code, int val) const
     {
         input_event ie;
 
@@ -50,7 +50,7 @@ namespace InputManager
         write(fd, &ie, sizeof(ie));
     }
 
-    std::pair<int, bool> Linux::getFromKeyMap(char c)
+    std::pair<int, bool> Linux::getFromKeyMap(char c) const
     {
         if(c >= 'a' && c <= 'z')
             c -= 32;
@@ -64,7 +64,7 @@ namespace InputManager
         return {0, 0};
     }
 
-    int Linux::parse_char(char c, bool &shiftPressed)
+    int Linux::parse_char(char c, bool &shiftPressed) const
     {
         shiftPressed = false;
 
@@ -77,7 +77,7 @@ namespace InputManager
         return res.first;
     }
 
-    void Linux::click()
+    void Linux::click() const
     {
         emit(fd, EV_KEY, BTN_LEFT, 1);
         emit(fd, EV_SYN, SYN_REPORT, 0);
@@ -85,7 +85,7 @@ namespace InputManager
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::right_click()
+    void Linux::right_click() const
     {
         emit(fd, EV_KEY, BTN_RIGHT, 1);
         emit(fd, EV_SYN, SYN_REPORT, 0);
@@ -93,32 +93,32 @@ namespace InputManager
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::move(int dx, int dy)
+    void Linux::move(int dx, int dy) const
     {
         emit(fd, EV_REL, REL_X, (int)(MOVE_SENSITIVITY / 10.0 * dx));
         emit(fd, EV_REL, REL_Y, (int)(MOVE_SENSITIVITY / 10.0 * dy));
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::scroll(int scroll_amount)
+    void Linux::scroll(int scroll_amount) const
     {
         emit(fd, EV_REL, REL_WHEEL, (int)((scroll_amount * (SCROLL_SENSITIVITY / 10.0))));
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::down()
+    void Linux::down() const
     {
         emit(fd, EV_KEY, BTN_LEFT, 1);
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::up()
+    void Linux::up() const 
     {
         emit(fd, EV_KEY, BTN_LEFT, 0);
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::send_key(char c)
+    void Linux::send_key(char c) const
     {
         bool shiftPressed;
         int code = parse_char(c, shiftPressed);

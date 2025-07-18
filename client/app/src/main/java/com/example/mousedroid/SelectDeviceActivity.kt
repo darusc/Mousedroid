@@ -33,10 +33,9 @@ class SelectDeviceActivity : AppCompatActivity() {
         deviceList = findViewById(R.id.deviceList)
         addButton = findViewById(R.id.addDeviceBtn)
 
-        val res = getPreferences(Context.MODE_PRIVATE)?.getString("DEVICES", "[]")
-
-        res?.let {
-            devices = gson.fromJson(res, object: TypeToken<ArrayList<Pair<String, String>>>(){}.type)
+        // Get stored devices from storage
+        getPreferences(Context.MODE_PRIVATE)?.getString("DEVICES", "[]")?.let {
+            devices = gson.fromJson(it, object: TypeToken<ArrayList<Pair<String, String>>>(){}.type)
         }
 
         adapter = DeviceAdapter(this, devices, object : DeviceAdapter.OnItemClickListener {

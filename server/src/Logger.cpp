@@ -3,6 +3,7 @@
 int Logger::rows = 0;
 wxListView* Logger::monitor;
 std::stringstream Logger::output;
+std::ofstream Logger::fileoutstream("app.log");
 
 void Logger::displayOutput()
 {
@@ -11,6 +12,8 @@ void Logger::displayOutput()
 
     monitor->InsertItem(rows, time);
     monitor->SetItem(rows++, 1, output.str());
+
+    fileoutstream << time << " " << output.str() << std::endl;
 
     output.str("");
 }

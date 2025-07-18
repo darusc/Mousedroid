@@ -4,9 +4,18 @@ import android.content.Context
 import android.util.Log
 import android.view.*
 import androidx.core.view.GestureDetectorCompat
+import com.example.mousedroid.networking.Connection
+import com.example.mousedroid.networking.ConnectionManager
 
+/**
+ * Class that handles simples gestures (tap, long press, scroll) using
+ * a GestureDetectorCompat
+ */
 class GestureHandler(context: Context): GestureDetector.SimpleOnGestureListener() {
 
+    private val TAG = "Mousedroid"
+
+    private val connectionManager = ConnectionManager.getInstance()
     val detector: GestureDetectorCompat = GestureDetectorCompat(context, this)
 
     private lateinit var view: View
@@ -14,35 +23,24 @@ class GestureHandler(context: Context): GestureDetector.SimpleOnGestureListener(
     var scrolled = false
     var lastScrolled: Long = 0
     var isLongPressed = false
-    var isMovingAfterLongPress = false
+    var isDragging = false
 
-    private val TAG = "Mousedroid"
-
-    companion object {
-        const val CLICK = 1
-        const val RIGHT_CLICK = 2
-        const val DOWN = 3
-        const val UP = 4
-        const val MOVE = 5
-        const val SCROLL = 6
-    }
-
-    fun bindView(_view: View){
-        view = _view.findViewById(R.id.touchpadFragment)
+    fun bindView(view: View) {
+        this.view = view
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        TcpClient.write(CLICK)
+        connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
         return super.onSingleTapUp(e)
     }
 
     override fun onDoubleTap(e: MotionEvent): Boolean {
-        TcpClient.write(CLICK)
+        connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
         return true
     }
 
     override fun onLongPress(e: MotionEvent) {
-        TcpClient.write(DOWN)
+        connectionManager.sendBytes(byteArrayOf(Input.DOWN), true)
         isLongPressed = true
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
@@ -53,10 +51,22 @@ class GestureHandler(context: Context): GestureDetector.SimpleOnGestureListener(
         distanceX: Float,
         distanceY: Float
     ): Boolean {
-        if(e1.pointerCount == 1 && e2.pointerCount == 1 && System.currentTimeMillis() - lastScrolled > 500)
-            TcpClient.write(MOVE, distanceX, distanceY)
+        if(e1.pointerCount == 1 && e2.pointerCount == 1 && System.currentTimeMillis() - lastScrolled > 500) {
+            connectionManager.sendBytes(
+                byteArrayOf(
+                    Input.MOVE,
+                    distanceX.toInt().coerceIn(-128, 127).toByte(),
+                    distanceY.toInt().coerceIn(-128, 127).toByte()),
+                true)
+            println(distanceX)
+            println(distanceY)
+        }
         else {
-            TcpClient.write(SCROLL, -distanceY)
+            connectionManager.sendBytes(
+                byteArrayOf(
+                    Input.SCROLL,
+                    (-distanceY).toInt().coerceIn(-128, 127).toByte()),
+                true)
             scrolled = true
             lastScrolled = System.currentTimeMillis()
         }

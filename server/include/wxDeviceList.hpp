@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "Device.hpp"
+#include "net/Device.hpp"
 
 class wxDeviceList: public wxListView
 {
@@ -15,12 +15,11 @@ class wxDeviceList: public wxListView
         wxDeviceList(wxWindow *parent, int id);
         ~wxDeviceList();
 
-        void AddDevice(Device device);
-        void RemoveDevice(int id);
-    
+        void SetDevices(const std::vector<DeviceInfo>& devs);
+        
     private:
-        std::vector<Device> devices;
+        std::vector<DeviceInfo> devices;
 
         void UpdateView(bool refresh = false);
-        void InsertDevice(int i, Device &device);
+        void InsertDevice(int i, DeviceInfo &device);
 };
