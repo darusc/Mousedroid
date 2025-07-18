@@ -67,7 +67,6 @@ namespace InputManager
 
     void Windows::move(int dx, int dy) const
     {
-        LOG("MOVE: dx=", dx, ", dy=", dy, " (sensitivity: ", MOVE_SENSITIVITY, ")");
         INPUT input = {};
         ZeroMemory(&input, sizeof(input));
         input.type = INPUT_MOUSE;

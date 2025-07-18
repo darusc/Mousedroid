@@ -17,7 +17,6 @@ class wxApplication : public wxApp, public Server::ConnectionListener
         wxApplication();
 
         virtual bool OnInit() override;
-        // virtual int OnExit() override;
 
         virtual void OnDeviceConnected(std::string device) const override;
         virtual void OnDeviceDisconnected(std::string device) const override;

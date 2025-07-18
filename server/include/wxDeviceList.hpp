@@ -16,9 +16,7 @@ class wxDeviceList: public wxListView
         ~wxDeviceList();
 
         void SetDevices(const std::vector<DeviceInfo>& devs);
-        void AddDevice(DeviceInfo device);
-        void RemoveDevice(int id);
-    
+        
     private:
         std::vector<DeviceInfo> devices;
 

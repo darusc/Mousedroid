@@ -50,25 +50,6 @@ void wxDeviceList::SetDevices(const std::vector<DeviceInfo> &devs)
     UpdateView(true);
 }
 
-void wxDeviceList::AddDevice(DeviceInfo device)
-{
-    devices.push_back(device);
-    UpdateView();
-}
-
-void wxDeviceList::RemoveDevice(int id)
-{
-    for(auto it = devices.begin(); it != devices.end(); it++)
-    {
-        if((*it).ID == id)
-        {
-            devices.erase(it);
-            UpdateView(true);
-            break;
-        }
-    }
-}
-
 wxDeviceList::~wxDeviceList()
 {
 }

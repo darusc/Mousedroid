@@ -10,7 +10,6 @@ bool wxApplication::OnInit()
 {        
     main_frame = new wxMain(settings);
     
-    //server = new Server(settings);
     server = new Server(6969, *this, settings, inputManager);
 
     Server::HostInfo hostInfo = server->GetHostInfo();
@@ -21,24 +20,12 @@ bool wxApplication::OnInit()
     if(!settings.GetRunAtStartup())
         main_frame->Show();
     
-    //server->setDeviceList(main_frame->wxdevlist);
     server->Start();
 
     main_frame->UpdateUI();
 
     return true;
 }
-
-// int wxApplication::OnExit()
-// {
-    // LOG("Exiting application...");
-    // server->Close();
-    // delete server;
-
-    // Logger::monitor->Destroy();
-
-    // return wxApp::OnExit();
-// }
 
 void wxApplication::OnDeviceConnected(std::string device) const
 {
