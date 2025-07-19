@@ -159,10 +159,10 @@ void wxMain::InitSettingsTab()
     // ==== Info ====
     wxBoxSizer *info = new wxBoxSizer(wxVERTICAL);
 
-    wxStaticText *t = new wxStaticText(tab_settings, wxID_ANY, "Mousedroid v1.0");
+    wxStaticText *t = new wxStaticText(tab_settings, wxID_ANY, "Mousedroid v1.4");
     t->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     info->Add(t, wxSizerFlags().Center());
-    info->Add(new wxHyperlinkCtrl(tab_settings, wxID_ANY, "Github", "https://github.com/hypertensiune/Mousedroid"), wxSizerFlags().Center());
+    info->Add(new wxHyperlinkCtrl(tab_settings, wxID_ANY, "Github", "https://github.com/darusc/Mousedroid"), wxSizerFlags().Center());
 
 
     topsizer2->Add(sysboxsizer, wxSizerFlags().Expand().Border(wxALL, 5));

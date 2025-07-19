@@ -152,10 +152,7 @@ class GestureHandler(context: Context): View.OnTouchListener {
         if(p1?.let { gestureDetector.onTouchEvent(it) } == true) {
             return true
         }
-
-        if(p1?.let { scaleDetector.onTouchEvent(it) } == true) {
-            return true
-        }
+        p1?.let { scaleDetector.onTouchEvent(it) }
 
         when(p1?.action) {
             MotionEvent.ACTION_MOVE -> {
