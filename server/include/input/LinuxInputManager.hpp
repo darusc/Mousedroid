@@ -106,10 +106,12 @@ namespace InputManager
             void click() const override;
             void right_click() const override;
             void move(int dx, int dy) const override;
-            void scroll(int scroll_amount) const override;
+            void scroll(int dy) const override;
+            void scroll_h(int dx) const override;
             void down() const override;
             void up() const override;
             void send_key(char c) const override;
+            void zoom(int scale) const override;
     };
 }
 

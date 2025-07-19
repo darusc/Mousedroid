@@ -70,9 +70,11 @@ namespace InputManager
             virtual void right_click() const override;
             virtual void move(int dx, int dy) const override;
             virtual void scroll(int dy) const override;
+            virtual void scroll_h(int dx) const override;
             virtual void down() const override;
             virtual void up() const override;
             virtual void send_key(char c) const override;
+            virtual void zoom(int scale) const override;
     };
 }
 

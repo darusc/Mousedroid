@@ -43,11 +43,11 @@ class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallb
                 changeActiveInputFragment(NumpadFragment())
             }
             else {
-                changeActiveInputFragment(TouchpadFragment(baseContext))
+                changeActiveInputFragment(TouchpadFragment())
             }
         }
 
-        changeActiveInputFragment(TouchpadFragment(baseContext))
+        changeActiveInputFragment(TouchpadFragment())
     }
 
     override fun onDisconnected() {

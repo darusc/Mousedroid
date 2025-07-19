@@ -234,11 +234,6 @@ class ConnectionManager private constructor() : Connection.Listener {
             return;
         }
 
-        bytes.forEach {
-            print(it)
-        }
-        println()
-
         when(withCoroutine) {
             false -> connection.send(bytes)
             true -> CoroutineScope(Dispatchers.IO).launch { connection.send(bytes) }
