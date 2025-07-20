@@ -1,5 +1,7 @@
 #include "SettingsManager.hpp"
 
+#include "adb.hpp"
+
 SettingsManager::SettingsManager() : bAdbStarted(false)
 {
     #ifdef _WIN32
@@ -119,18 +121,18 @@ void SettingsManager::ADBOn()
 {
     int a;
     #ifdef _WIN32
-        a = system("adb reverse tcp:6969 tcp:6969");        
+        //a = system("adb reverse tcp:6969 tcp:6969");        
+        bAdbStarted = adb::start(6969);
     #else
         a = system("./adb reverse tcp:6969 tcp:6969");
+        if(a == 0)
+        {
+            LOG("ADB Server [PORT 6969] STARTED");
+            bAdbStarted = true;
+        }
+        else
+            LOG("ADB Server FAILED");
     #endif
-
-    if(a == 0)
-    {
-        LOG("ADB Server [PORT 6969] STARTED");
-        bAdbStarted = true;
-    }
-    else
-        LOG("ADB Server FAILED");
 }
 
 void SettingsManager::ADBOff()
@@ -138,11 +140,12 @@ void SettingsManager::ADBOff()
     if(bAdbStarted)
     {
         #ifdef _WIN32
-            int a = system("adb reverse --remove-all");
+            //int a = system("adb reverse --remove-all");
+            adb::kill(6969);
         #else
             int a = system("./adb reverse --remove-all");
+            LOG("ADB Server [PORT 6969] STOPPED");
         #endif
-        LOG("ADB Server [PORT 6969] STOPPED");
         bAdbStarted = false;
     }
 }
