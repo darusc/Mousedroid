@@ -6,10 +6,16 @@
 
 <p align="center">Use your android phone as a mouse & keyboard.</p>
 
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width=170>](https://apt.izzysoft.de/fdroid/index/apk/com.darusc.mousedroid)
+
+![GitHub License](https://img.shields.io/github/license/darusc/mousedroid?style=for-the-badge)
+![GitHub Release](https://img.shields.io/github/v/release/darusc/mousedroid?style=for-the-badge)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/darusc/mousedroid/total?style=for-the-badge)
+[<img src="https://shields.rbtlog.dev/simple/com.darusc.mousedroid" alt="RB shield">](https://shields.rbtlog.dev/com.darusc.mousedroid)
+
 ## Description
 
 Cross platform application that transforms your android phone in an input peripheral. Use it as a mouse (touchpad), keyboard or numpad. Wired or wirelessly, control your pc with your phone.
-
 
 ### Supported platforms:
 - Windows
