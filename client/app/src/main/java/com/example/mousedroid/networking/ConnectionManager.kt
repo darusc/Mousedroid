@@ -232,6 +232,13 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
     }
 
+    fun disconnect() {
+        CoroutineScope(Dispatchers.IO).launch {
+            tcpConn?.close()
+            udpConn?.close()
+        }
+    }
+
     fun sendBytes(bytes: ByteArray, withCoroutine: Boolean = false) {
         if(connection == null) {
             return;

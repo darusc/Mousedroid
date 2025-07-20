@@ -26,6 +26,6 @@ fun getDeviceDetails(context: Context, connectionMode: Mode): String {
         Settings.Secure.getString(context.contentResolver, "bluetooth_name")
     }
 
-    val deviceDetails = "$manufacturer/$deviceName/$model/$connectionMode"
+    val deviceDetails = "$manufacturer/$deviceName/$model/${connectionMode.ordinal}"
     return deviceDetails
 }

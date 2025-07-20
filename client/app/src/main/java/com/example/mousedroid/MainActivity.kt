@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     override fun onResume() {
         super.onResume()
         connectionManager = ConnectionManager.getInstance(this)
+        connectionManager.disconnect()
     }
 
     override fun onRequestPermissionsResult(
