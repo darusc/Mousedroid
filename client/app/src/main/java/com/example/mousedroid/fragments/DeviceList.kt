@@ -1,7 +1,6 @@
 package com.example.mousedroid.fragments
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
@@ -16,7 +15,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mousedroid.DeviceAdapter
+import com.example.mousedroid.adapters.DeviceAdapter
 import com.example.mousedroid.R
 import com.example.mousedroid.getDeviceDetails
 import com.example.mousedroid.networking.ConnectionManager

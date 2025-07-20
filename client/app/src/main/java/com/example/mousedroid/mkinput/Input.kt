@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.example.mousedroid.mkinput
 
 class Input {
     companion object {

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#242424"
+    android:background="#121212"
     tools:context=".fragments.Main">
 
     <ImageView
@@ -42,7 +42,7 @@
         android:layout_alignStart="@id/textView2"
         android:layout_alignEnd="@id/textView2"
         android:layout_centerHorizontal="true"
-        android:backgroundTint="#121212"
+        android:backgroundTint="#000000"
         android:padding="20dp"
         android:text="Connect USB"
         android:textColor="#c9c9c9"
@@ -66,7 +66,7 @@
         android:layout_alignStart="@id/textView2"
         android:layout_alignEnd="@id/textView2"
         android:layout_centerHorizontal="true"
-        android:backgroundTint="#121212"
+        android:backgroundTint="#000000"
         android:padding="20dp"
         android:text="Connect WiFi"
         android:textColor="#c9c9c9"

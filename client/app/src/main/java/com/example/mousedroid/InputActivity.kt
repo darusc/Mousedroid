@@ -10,6 +10,9 @@ import android.widget.CompoundButton
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.mousedroid.fragments.Numpad
+import com.example.mousedroid.fragments.Touchpad
+import com.example.mousedroid.mkinput.KeyboardInputWatcher
 import com.example.mousedroid.networking.ConnectionManager
 
 class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
@@ -40,14 +43,14 @@ class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallb
 
         findViewById<CheckBox>(R.id.openNumpad).setOnCheckedChangeListener { compoundButton: CompoundButton, checked: Boolean ->
             if (checked) {
-                changeActiveInputFragment(NumpadFragment())
+                changeActiveInputFragment(Numpad())
             }
             else {
-                changeActiveInputFragment(TouchpadFragment())
+                changeActiveInputFragment(Touchpad())
             }
         }
 
-        changeActiveInputFragment(TouchpadFragment())
+        changeActiveInputFragment(Touchpad())
     }
 
     override fun onDisconnected() {
@@ -59,5 +62,5 @@ class InputActivity: AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
     }
 
-    fun numpadButtonClickListener(view: View) = NumpadFragment.onNumpadButtonClickListener(view)
+    fun numpadButtonClickListener(view: View) = Numpad.onNumpadButtonClickListener(view)
 }
