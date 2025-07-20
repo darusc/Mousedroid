@@ -10,7 +10,7 @@
 
 - ASIO https://think-async.com/Asio/. Download the library and add it to path as `ASIO`. Project is configured to use the standalone version, if you use the BOOST version you may need to change include paths.
 
-- Android SDK Platform tools https://developer.android.com/tools/releases/platform-tools. For a wired connection adb is required. Download the platform tools and copy `adb.exe` in the same directory as the built executable
+- Android SDK Platform tools https://developer.android.com/tools/releases/platform-tools. For a wired connection adb is required. ADB binaries are also provided.
 
 
 ### Linux
@@ -21,9 +21,7 @@ libgtk-3-dev
 libwxgtk3.0-dev
 ```
 - ASIO https://think-async.com/Asio/. Download the library and config the CMakeLists or install the `libasio-dev` package.
-- Android SDK Platform tools https://developer.android.com/tools/releases/platform-tools. For a wired connection adb is required. Download the platform tools and copy `adb` executable in the same directory as the built executable
-
-
+- Android SDK Platform tools https://developer.android.com/tools/releases/platform-tools - install the ```android-platform-tools``` package.
 
 ## Build
 
