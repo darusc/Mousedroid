@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.example.mousedroid.fragments
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -6,9 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.mousedroid.mkinput.Input
+import com.example.mousedroid.R
 import com.example.mousedroid.networking.ConnectionManager
 
-class NumpadFragment : Fragment() {
+class Numpad : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -16,7 +18,7 @@ class NumpadFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        return inflater.inflate(R.layout.numpad_fragment, container, false)
+        return inflater.inflate(R.layout.fragment_numpad, container, false)
     }
 
     companion object {

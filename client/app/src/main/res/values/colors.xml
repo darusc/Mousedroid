@@ -2,7 +2,8 @@
 <resources>
     <color name="black">#000000</color>
     <color name="background">#121212</color>
-    <color name="numpadHighlight">#AF4F6F8F</color>
+<!--    <color name="numpadHighlight">#AF4F6F8F</color>-->
+    <color name="numpadHighlight">#b2b2b2</color>
     <color name="card_dark">#222222</color>
     <color name="card_text">#e7e7e7</color>
     <color name="card_text2">#8b8b8b</color>

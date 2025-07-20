@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.example.mousedroid.mkinput
 
 class Input {
     companion object {
@@ -9,6 +9,7 @@ class Input {
         const val MOVE: Byte = 0x05
         const val SCROLL: Byte = 0x06
         const val KEYPRESS: Byte = 0x07
-        const val NUMPAD: Byte = 0x08
+        const val SCROLL_H: Byte = 0x08
+        const val ZOOM: Byte = 0x09
     }
 }

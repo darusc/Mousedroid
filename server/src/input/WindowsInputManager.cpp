@@ -88,6 +88,25 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
+    void Windows::scroll_h(int scroll_amount) const
+    {
+        INPUT inputs[3] = {};
+        ZeroMemory(inputs, sizeof(inputs));
+        
+        inputs[0].type = INPUT_KEYBOARD;
+        inputs[0].ki.wVk = VK_SHIFT;
+
+        inputs[1].type = INPUT_MOUSE;
+        inputs[1].mi.dwFlags = MOUSEEVENTF_WHEEL;
+        inputs[1].mi.mouseData = (int)(10 * (scroll_amount * (SCROLL_SENSITIVITY / 10.0)));
+
+        inputs[2].type = INPUT_KEYBOARD;
+        inputs[2].ki.wVk = VK_SHIFT;
+        inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
+
+        SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+    }
+
     void Windows::down() const
     {
         INPUT input = {};
@@ -131,6 +150,25 @@ namespace InputManager
 
         inputs[2].type = INPUT_KEYBOARD;
         inputs[2].ki.wVk = keycode;
+        inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
+
+        SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+    }
+
+    void Windows::zoom(int scale) const
+    {
+        INPUT inputs[3] = {};
+        ZeroMemory(inputs, sizeof(inputs));
+        
+        inputs[0].type = INPUT_KEYBOARD;
+        inputs[0].ki.wVk = VK_CONTROL;
+
+        inputs[1].type = INPUT_MOUSE;
+        inputs[1].mi.dwFlags = MOUSEEVENTF_WHEEL;
+        inputs[1].mi.mouseData = scale;
+
+        inputs[2].type = INPUT_KEYBOARD;
+        inputs[2].ki.wVk = VK_CONTROL;
         inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
 
         SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));

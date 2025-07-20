@@ -102,6 +102,18 @@ namespace InputManager
 
     void Linux::scroll(int scroll_amount) const
     {
+        emit(fd, EV_KEY, KEY_LEFTSHIFT, 1);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+
+        emit(fd, EV_REL, REL_WHEEL, (int)((scroll_amount * (SCROLL_SENSITIVITY / 10.0))));
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+        
+        emit(fd, EV_KEY, KEY_LEFTSHIFT, 0);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+    }
+
+    void Linux::scroll_h(int scroll_amount) const
+    {
         emit(fd, EV_REL, REL_WHEEL, (int)((scroll_amount * (SCROLL_SENSITIVITY / 10.0))));
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
@@ -139,6 +151,18 @@ namespace InputManager
             emit(fd, EV_KEY, KEY_LEFTSHIFT, 0);
             emit(fd, EV_SYN, SYN_REPORT, 0);
         }
+    }
+
+    void Linux::zoom(int scale) const
+    {
+        emit(fd, EV_KEY, KEY_LEFTCTRL, 1);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+
+        emit(fd, EV_REL, REL_WHEEL, scroll_amount);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+        
+        emit(fd, EV_KEY, KEY_LEFTCTRL, 0);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 }
 
