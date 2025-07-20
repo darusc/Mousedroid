@@ -1,11 +1,11 @@
-package com.example.mousedroid.fragments
+package com.darusc.mousedroid.fragments
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import com.example.mousedroid.mkinput.GestureHandler
-import com.example.mousedroid.R
+import com.darusc.mousedroid.mkinput.GestureHandler
+import com.darusc.mousedroid.R
 
 class Touchpad() : Fragment() {
 

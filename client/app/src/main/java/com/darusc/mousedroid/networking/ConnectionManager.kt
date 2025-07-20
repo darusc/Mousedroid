@@ -1,4 +1,4 @@
-package com.example.mousedroid.networking
+package com.darusc.mousedroid.networking
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope

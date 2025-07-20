@@ -1,4 +1,4 @@
-package com.example.mousedroid.fragments
+package com.darusc.mousedroid.fragments
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.mousedroid.mkinput.Input
-import com.example.mousedroid.R
-import com.example.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.mkinput.Input
+import com.darusc.mousedroid.R
+import com.darusc.mousedroid.networking.ConnectionManager
 
 class Numpad : Fragment() {
 

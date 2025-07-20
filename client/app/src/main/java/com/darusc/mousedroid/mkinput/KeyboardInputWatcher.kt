@@ -1,9 +1,9 @@
-package com.example.mousedroid.mkinput
+package com.darusc.mousedroid.mkinput
 
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.example.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.networking.ConnectionManager
 
 class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
 

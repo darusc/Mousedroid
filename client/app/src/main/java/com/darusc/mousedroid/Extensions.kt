@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.darusc.mousedroid
 
 import android.content.Context
 import android.view.WindowManager

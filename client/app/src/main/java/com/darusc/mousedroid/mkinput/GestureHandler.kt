@@ -1,10 +1,10 @@
-package com.example.mousedroid.mkinput
+package com.darusc.mousedroid.mkinput
 
 import android.content.Context
 import android.os.Looper
 import android.view.*
 import androidx.core.view.GestureDetectorCompat
-import com.example.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.networking.ConnectionManager
 import kotlinx.coroutines.Runnable
 import kotlin.math.abs
 import kotlin.math.ln

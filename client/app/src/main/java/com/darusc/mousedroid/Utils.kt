@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.darusc.mousedroid
 
 import android.Manifest
 import android.bluetooth.BluetoothManager
@@ -8,7 +8,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresPermission
-import com.example.mousedroid.networking.ConnectionManager.Mode
+import com.darusc.mousedroid.networking.ConnectionManager.Mode
 
 fun getConnectionMode(context: Context): Mode {
     val intent = context.registerReceiver(null, IntentFilter("android.hardware.usb.action.USB_STATE"))

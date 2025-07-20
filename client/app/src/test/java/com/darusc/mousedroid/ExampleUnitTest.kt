@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.darusc.mousedroid
 
 import org.junit.Test
 

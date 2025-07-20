@@ -15,16 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Mousedroid">
         <activity
-            android:name="com.example.mousedroid.SelectDeviceActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
-        <activity
-            android:name="com.example.mousedroid.InputActivity"
+            android:name="com.darusc.mousedroid.InputActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="sensor"/>
         <activity
-            android:name="com.example.mousedroid.MainActivity"
+            android:name="com.darusc.mousedroid.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

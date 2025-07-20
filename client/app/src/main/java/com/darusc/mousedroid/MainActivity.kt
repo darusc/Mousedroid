@@ -1,4 +1,4 @@
-package com.example.mousedroid
+package com.darusc.mousedroid
 
 import android.Manifest
 import android.app.Activity
@@ -18,8 +18,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.mousedroid.fragments.Main
-import com.example.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.fragments.Main
+import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallback {

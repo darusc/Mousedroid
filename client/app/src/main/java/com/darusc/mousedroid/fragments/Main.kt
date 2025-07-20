@@ -1,4 +1,4 @@
-package com.example.mousedroid.fragments
+package com.darusc.mousedroid.fragments
 
 import android.Manifest
 import android.os.Bundle
@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresPermission
 import androidx.fragment.app.Fragment
-import com.example.mousedroid.R
-import com.example.mousedroid.getDeviceDetails
-import com.example.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.R
+import com.darusc.mousedroid.getDeviceDetails
+import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 
 class Main : Fragment() {

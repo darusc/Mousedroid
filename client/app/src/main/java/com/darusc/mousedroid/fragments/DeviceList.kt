@@ -1,4 +1,4 @@
-package com.example.mousedroid.fragments
+package com.darusc.mousedroid.fragments
 
 import android.Manifest
 import android.content.Context
@@ -15,13 +15,13 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mousedroid.adapters.DeviceAdapter
-import com.example.mousedroid.R
-import com.example.mousedroid.getDeviceDetails
-import com.example.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.adapters.DeviceAdapter
+import com.darusc.mousedroid.R
+import com.darusc.mousedroid.getDeviceDetails
+import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
-import com.example.mousedroid.dim
+import com.darusc.mousedroid.dim
 
 class DeviceList : Fragment() {
 
