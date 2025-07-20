@@ -59,6 +59,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     private var streamingEnabled = false
 
     interface ConnectionStateCallback {
+        fun onConnectionInitiated() { }
         fun onConnectionSuccessful(connectionMode: Mode) { }
         fun onConnectionFailed(connectionMode: Mode) { }
         fun onDisconnected() { }
@@ -199,6 +200,7 @@ class ConnectionManager private constructor() : Connection.Listener {
      * Tcp socket is used only for commands, video frames are streamed using Udp
      */
     fun connect(ipAddress: String, port: Int, deviceDetails: String) {
+        connectionStateCallback?.onConnectionInitiated()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 tcpConn = TCPConnection(ipAddress, port, false, this@ConnectionManager)
@@ -217,6 +219,7 @@ class ConnectionManager private constructor() : Connection.Listener {
      * Tcp socket is used both for connection and streaming (adb doesn't allow Udp port forwarding)
      */
     fun connect(port: Int, deviceDetails: String) {
+        connectionStateCallback?.onConnectionInitiated()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 tcpConn = TCPConnection("127.0.0.1", port, true, this@ConnectionManager)
