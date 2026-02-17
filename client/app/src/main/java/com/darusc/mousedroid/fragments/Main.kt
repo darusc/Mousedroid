@@ -25,21 +25,19 @@ class Main : Fragment() {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<MaterialButton>(R.id.btnConnectUSB).setOnClickListener(::onButtonConnectUSBClick)
         view.findViewById<MaterialButton>(R.id.btnConnectWIFI).setOnClickListener(::onButtonConnectWIFIClick)
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            view.findViewById<MaterialButton>(R.id.btnConnectBT).setOnClickListener(::onButtonConnectBluetoothClick)
-        }
+        view.findViewById<MaterialButton>(R.id.btnConnectBT).setOnClickListener(::onButtonConnectBluetoothClick)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun onButtonConnectUSBClick(view: View) {
         val details = getDeviceDetails(requireContext(), ConnectionManager.Mode.USB)
-        connectionManager.connect(6969, details)
+        connectionManager.connectUSB(6969, details)
     }
 
     private fun onButtonConnectWIFIClick(view: View) {
@@ -54,5 +52,9 @@ class Main : Fragment() {
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun onButtonConnectBluetoothClick(view: View) {
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

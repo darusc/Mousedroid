@@ -36,7 +36,7 @@ class GestureHandler(context: Context): View.OnTouchListener {
     private val scaleDetector: ScaleGestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             val scale = (ln(detector.scaleFactor) * 500).toInt().coerceIn(-128, 127).toByte()
-            connectionManager.sendBytes(byteArrayOf(Input.ZOOM, scale), true)
+            connectionManager.send(InputEvent.Zoom(scale.toInt()), true)
 
             return true
         }
@@ -50,7 +50,7 @@ class GestureHandler(context: Context): View.OnTouchListener {
             // Post a runnable that sends a click event after a set delay
             // onDoubleTap will cancel it when called
             singleTapRunnable = Runnable {
-                connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
+                connectionManager.send(InputEvent.MouseClick(InputEvent.MouseButton.LEFT), true)
             }
             handler.postDelayed(singleTapRunnable!!, EV_DELAY_MILLIS)
             return super.onSingleTapUp(e)
@@ -66,8 +66,8 @@ class GestureHandler(context: Context): View.OnTouchListener {
             // Post a runnable that will send 2 click events after a set time
             // If before that a move event is detected by the onTouch, it will be canceled
             doubleTapRunnable = Runnable {
-                connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
-                connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
+                connectionManager.send(InputEvent.MouseClick(InputEvent.MouseButton.LEFT), true)
+                connectionManager.send(InputEvent.MouseClick(InputEvent.MouseButton.LEFT), true)
                 state.doublePress = false
                 state.dragging = false
             }
@@ -95,24 +95,20 @@ class GestureHandler(context: Context): View.OnTouchListener {
                 val delta: Float
                 if(abs(distanceY) > abs(distanceX)) {
                     // Vertical scrolling
-                    type = Input.SCROLL
-                    delta = -distanceY
+                    connectionManager.send(InputEvent.MouseScroll(0, -distanceY.toInt().coerceIn(-128, 127)), true)
                 } else {
                     // Horizontal scrolling
-                    type = Input.SCROLL_H
-                    delta = -distanceX
+                    connectionManager.send(InputEvent.MouseScroll(-distanceX.toInt().coerceIn(-128, 127), 0), true)
                 }
-
-                connectionManager.sendBytes(byteArrayOf(type, delta.toInt().coerceIn(-128, 127).toByte()), true)
             }
             else {
                 // We consider to be just moving if there is 1 pointer in both events
-                connectionManager.sendBytes(
-                    byteArrayOf(
-                        Input.MOVE,
-                        distanceX.toInt().coerceIn(-128, 127).toByte(),
-                        distanceY.toInt().coerceIn(-128, 127).toByte()),
-                    true)
+                connectionManager.send(
+                    InputEvent.MouseMove(
+                        distanceX.toInt().coerceIn(-128, 127),
+                        distanceY.toInt().coerceIn(-128, 127)
+                    ),
+                true)
             }
 
             return super.onScroll(e1, e2, distanceX, distanceY)
@@ -136,7 +132,7 @@ class GestureHandler(context: Context): View.OnTouchListener {
                 // Right click is detected when there are 2 pointers and 1 starts to lift
                 // Can't be detected in onSingleTapUp because the 2 pointers are not lifted at the same time
                 // so we don't get that event with 2 pointers but rather 2 different events with 1 pointer
-                connectionManager.sendBytes(byteArrayOf(Input.RCLICK), true)
+                connectionManager.send(InputEvent.MouseClick(InputEvent.MouseButton.RIGHT), true)
             }
         }
 
@@ -144,7 +140,7 @@ class GestureHandler(context: Context): View.OnTouchListener {
             // Cancel dragging
             state.scrolling = false
             state.doublePress = false
-            connectionManager.sendBytes(byteArrayOf(Input.UP), true)
+            connectionManager.send(InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, false), true)
         }
 
         if(p1?.let { gestureDetector.onTouchEvent(it) } == true) {
@@ -165,7 +161,7 @@ class GestureHandler(context: Context): View.OnTouchListener {
                     state.dragging = true
 
                     // Send a mouse down event to initiate dragging
-                    connectionManager.sendBytes(byteArrayOf(Input.DOWN), true)
+                    connectionManager.send(InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, true), true)
 
                     val cancelEvent = MotionEvent.obtain(p1)
                     cancelEvent.action = MotionEvent.ACTION_CANCEL

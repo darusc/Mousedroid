@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.darusc.mousedroid.mkinput.Input
+import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.networking.ConnectionManager
 
@@ -23,7 +23,7 @@ class Numpad : Fragment() {
 
     companion object {
         fun onNumpadButtonClickListener(view: View) {
-            ConnectionManager.getInstance().sendBytes(byteArrayOf(Input.KEYPRESS, view.tag.toString().toInt().toByte()), true)
+            ConnectionManager.getInstance().send(InputEvent.KeyPress(byteArrayOf(view.tag.toString().toByte())), true)
         }
     }
 }

@@ -22,7 +22,7 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
     override fun onTextChanged(text: CharSequence, start: Int, lengthBefore: Int, lengthAfter: Int) {
         if(!ignoreChange) {
             if(lengthAfter < lengthBefore){
-                connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, 127), true) // DEL
+                connectionManager.send(InputEvent.KeyPress(byteArrayOf(127)), true) // DEL
                 if(start == 1 && lengthAfter == 0){
                     reset()
                 }
@@ -30,16 +30,16 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
             else {
                 val c = if(text.isNotEmpty()) text[text.length - 1] else null
                 if(c == '\n'){
-                    connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, 10), true) // \n
+                    connectionManager.send(InputEvent.KeyPress(byteArrayOf(10)), true) // \n
                     reset()
                 }
                 else {
                     if(lengthAfter == lengthBefore + 1) {
-                        connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, text[text.length - 1].code.toByte()), true)
+                        connectionManager.send(InputEvent.KeyPress(byteArrayOf(text.last().code.toByte())), true)
                     }
                     else {
                         val bytes = text.substring(start).map { it.code.toByte() }.toByteArray()
-                        connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, *bytes), true)
+                        connectionManager.send(InputEvent.KeyPress(bytes), true)
                     }
                 }
             }
