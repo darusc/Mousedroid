@@ -11,6 +11,7 @@ import androidx.annotation.RequiresPermission
 import androidx.fragment.app.Fragment
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.getDeviceDetails
+import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 
@@ -36,7 +37,7 @@ class Main : Fragment() {
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun onButtonConnectUSBClick(view: View) {
-        val details = getDeviceDetails(requireContext(), ConnectionManager.Mode.USB)
+        val details = getDeviceDetails(requireContext(), Connection.Mode.USB)
         connectionManager.connectUSB(6969, details)
     }
 
@@ -51,7 +52,7 @@ class Main : Fragment() {
     @RequiresApi(Build.VERSION_CODES.P)
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun onButtonConnectBluetoothClick(view: View) {
-
+        connectionManager.connectBluetooth(requireContext())
     }
 
     override fun onDestroy() {

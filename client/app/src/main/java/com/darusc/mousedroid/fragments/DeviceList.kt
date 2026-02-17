@@ -22,6 +22,7 @@ import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.darusc.mousedroid.dim
+import com.darusc.mousedroid.networking.Connection
 
 class DeviceList : Fragment() {
 
@@ -54,7 +55,7 @@ class DeviceList : Fragment() {
 
             @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun onItemClick(address: String) {
-                val details = getDeviceDetails(requireContext(), ConnectionManager.Mode.WIFI)
+                val details = getDeviceDetails(requireContext(), Connection.Mode.WIFI)
                 connectionManager.connectWIFI(address, 6969, details)
             }
         })

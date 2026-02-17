@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.darusc.mousedroid.fragments.Main
+import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 
@@ -91,7 +92,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         loadingPopup.showAtLocation(findViewById(android.R.id.content), Gravity.CENTER, 0, 0)
     }
 
-    override fun onConnectionSuccessful(connectionMode: ConnectionManager.Mode) {
+    override fun onConnectionSuccessful(connectionMode: Connection.Mode) {
         runOnUiThread {
             loadingPopup.dismiss()
         }
@@ -99,7 +100,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         inputActivityResultLauncher.launch(inputActivityIntent)
     }
 
-    override fun onConnectionFailed(connectionMode: ConnectionManager.Mode) {
+    override fun onConnectionFailed(connectionMode: Connection.Mode) {
         runOnUiThread {
             loadingPopup.dismiss()
             showPopupMessage(R.layout.connection_failed_fragment)

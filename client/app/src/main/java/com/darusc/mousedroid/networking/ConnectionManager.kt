@@ -1,6 +1,9 @@
 package com.darusc.mousedroid.networking
 
+import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.bluetooth.BluetoothConnection
 import com.darusc.mousedroid.networking.sockets.TCPConnection
@@ -34,12 +37,6 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
     }
 
-    enum class Mode {
-        USB,
-        WIFI,
-        BLUETOOTH
-    }
-
     private var connectionStateCallback: ConnectionStateCallback? = null
 
     private var tcpConn: TCPConnection? = null
@@ -47,18 +44,17 @@ class ConnectionManager private constructor() : Connection.Listener {
     private var btConn: BluetoothConnection? = null
 
     /**
-     * Active connection. Prioritize UDP connection if available
-     * otherwise fall back to the TCP Conneciton
+     * Active connection. UDP is prioritized over TCP
      */
     private val connection
-        get() = (udpConn ?: tcpConn) as Connection
+        get() = (udpConn ?: tcpConn ?: btConn) as Connection
 
     private var streamingEnabled = false
 
     interface ConnectionStateCallback {
         fun onConnectionInitiated() {}
-        fun onConnectionSuccessful(connectionMode: Mode) {}
-        fun onConnectionFailed(connectionMode: Mode) {}
+        fun onConnectionSuccessful(connectionMode: Connection.Mode) {}
+        fun onConnectionFailed(connectionMode: Connection.Mode) {}
         fun onDisconnected() {}
     }
 
@@ -77,10 +73,10 @@ class ConnectionManager private constructor() : Connection.Listener {
                 tcpConn = TCPConnection(ipAddress, port, false, this@ConnectionManager)
                 udpConn = UDPConnection(ipAddress, port)
                 tcpConn!!.sendBytes(deviceDetails.toByteArray())
-                connectionStateCallback?.onConnectionSuccessful(Mode.WIFI)
+                connectionStateCallback?.onConnectionSuccessful(Connection.Mode.WIFI)
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
-                connectionStateCallback?.onConnectionFailed(Mode.WIFI)
+                connectionStateCallback?.onConnectionFailed(Connection.Mode.WIFI)
             }
         }
     }
@@ -95,10 +91,10 @@ class ConnectionManager private constructor() : Connection.Listener {
             try {
                 tcpConn = TCPConnection("127.0.0.1", port, true, this@ConnectionManager)
                 tcpConn!!.sendBytes(deviceDetails.toByteArray())
-                connectionStateCallback?.onConnectionSuccessful(Mode.USB)
+                connectionStateCallback?.onConnectionSuccessful(Connection.Mode.USB)
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
-                connectionStateCallback?.onConnectionFailed(Mode.USB)
+                connectionStateCallback?.onConnectionFailed(Connection.Mode.USB)
             }
         }
     }
@@ -106,8 +102,11 @@ class ConnectionManager private constructor() : Connection.Listener {
     /**
      * Connect in bluetooth mode
      */
-    fun connectBluetooth() {
-
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun connectBluetooth(context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            btConn = BluetoothConnection(context, this@ConnectionManager)
+        }
     }
 
     fun disconnect() {
@@ -125,6 +124,12 @@ class ConnectionManager private constructor() : Connection.Listener {
         when (withCoroutine) {
             false -> connection.send(event)
             true -> CoroutineScope(Dispatchers.IO).launch { connection.send(event) }
+        }
+    }
+
+    override fun onConnected(connectionMode: Connection.Mode) {
+        if(connectionMode == Connection.Mode.BLUETOOTH) {
+            connectionStateCallback?.onConnectionSuccessful(connectionMode)
         }
     }
 
