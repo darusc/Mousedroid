@@ -1,10 +1,12 @@
 package com.darusc.mousedroid.fragments
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.fragment.app.Fragment
 import com.darusc.mousedroid.R
@@ -28,6 +30,10 @@ class Main : Fragment() {
 
         view.findViewById<MaterialButton>(R.id.btnConnectUSB).setOnClickListener(::onButtonConnectUSBClick)
         view.findViewById<MaterialButton>(R.id.btnConnectWIFI).setOnClickListener(::onButtonConnectWIFIClick)
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            view.findViewById<MaterialButton>(R.id.btnConnectBT).setOnClickListener(::onButtonConnectBluetoothClick)
+        }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -42,5 +48,11 @@ class Main : Fragment() {
             .replace(R.id.fragment_container, DeviceList())
             .addToBackStack(null)
             .commit()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun onButtonConnectBluetoothClick(view: View) {
+
     }
 }
