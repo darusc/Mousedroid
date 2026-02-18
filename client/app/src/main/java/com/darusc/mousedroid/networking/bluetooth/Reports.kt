@@ -31,6 +31,6 @@ class KeyboardReport(
     modifier: Byte,
     vararg keys: Byte
 ): HIDReport(
-    byteArrayOf(modifier, 0x00, *keys),
+    byteArrayOf(modifier, 0x00, *keys.copyOf(6)),
     REPORT_ID_KEYBOARD
 )

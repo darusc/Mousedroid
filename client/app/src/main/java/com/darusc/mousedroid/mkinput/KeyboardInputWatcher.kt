@@ -38,7 +38,8 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
                         connectionManager.send(InputEvent.KeyPress(byteArrayOf(text.last().code.toByte())), true)
                     }
                     else {
-                        val bytes = text.substring(start).map { it.code.toByte() }.toByteArray()
+                        val newText = text.substring(start, start + (lengthAfter - lengthBefore))
+                        val bytes = newText.toByteArray(Charsets.UTF_8)
                         connectionManager.send(InputEvent.KeyPress(bytes), true)
                     }
                 }

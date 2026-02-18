@@ -1,6 +1,7 @@
 package com.darusc.mousedroid.networking.bluetooth
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
@@ -15,9 +16,15 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat.startActivity
+import com.darusc.mousedroid.layouts.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.networking.toHIDReport
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -30,6 +37,8 @@ class BluetoothConnection(
 
     private val bluetoothAdapter: BluetoothAdapter
     private var bluetoothManager: BluetoothManager? = null
+
+    private val layout = KeyboardLayoutUS()
 
     /**
      * The device that sends the reports
@@ -63,18 +72,19 @@ class BluetoothConnection(
         override fun onConnectionStateChanged(device: BluetoothDevice?, state: Int) {
             super.onConnectionStateChanged(device, state)
 
-            bluetoothHostDevice = if(state == BluetoothProfile.STATE_CONNECTED) {
+            bluetoothHostDevice = if (state == BluetoothProfile.STATE_CONNECTED) {
                 device
             } else {
                 null
             }
 
-            when(state) {
+            when (state) {
                 BluetoothProfile.STATE_CONNECTING -> Log.d("Mousedroid", "Connecting...")
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("Mousedroid", "Connected!")
                     listener.onConnected(Mode.BLUETOOTH)
                 }
+
                 BluetoothProfile.STATE_DISCONNECTING -> Log.d("Mousedroid", "Disconnecting...")
                 BluetoothProfile.STATE_DISCONNECTED -> Log.d("Mousedroid", "Disconnected!")
             }
@@ -93,6 +103,22 @@ class BluetoothConnection(
         }
     }
 
+    /**
+     * Non blocking queue of reports to be sent over the bluetooth connection
+     */
+    private val reportChannel = Channel<Array<HIDReport>>(Channel.UNLIMITED)
+    @SuppressLint("MissingPermission")
+    private val sendReportJob = CoroutineScope(Dispatchers.IO).launch {
+        for (reports in reportChannel) {
+            for (report in reports) {
+                bluetoothHIDDevice?.sendReport(bluetoothHostDevice, report.id, report.bytes)
+                if (report is KeyboardReport) {
+                    delay(15)
+                }
+            }
+        }
+    }
+
     init {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -106,7 +132,7 @@ class BluetoothConnection(
         bluetoothAdapter.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                if(profile == BluetoothProfile.HID_DEVICE) {
+                if (profile == BluetoothProfile.HID_DEVICE) {
                     bluetoothHIDDevice = proxy as BluetoothHidDevice
                     bluetoothHIDDevice!!.registerApp(
                         sdp,
@@ -132,14 +158,13 @@ class BluetoothConnection(
         startActivity(applicationContext, discoverableIntent, null)
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun send(event: InputEvent) {
-        val reports = event.toHIDReport()
-        for (report in reports) {
-            bluetoothHIDDevice?.sendReport(bluetoothHostDevice, report.id, report.bytes)
-        }
+        val reports = event.toHIDReport(layout)
+        reportChannel.offer(reports)
     }
 
     override fun close() {
+        sendReportJob.cancel()
+        reportChannel.close()
     }
 }
