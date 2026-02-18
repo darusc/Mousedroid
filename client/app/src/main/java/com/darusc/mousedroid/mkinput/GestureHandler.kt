@@ -42,15 +42,39 @@ class GestureHandler(context: Context) : View.OnTouchListener {
      */
     private val scaleDetector: ScaleGestureDetector =
         ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+            private var accumulatedZoom = 0f
+            private val ZOOM_PIXEL_THRESHOLD = 20f
+
             override fun onScale(detector: ScaleGestureDetector): Boolean {
-                val scale = (ln(detector.scaleFactor) * 500).toInt().coerceIn(-128, 127).toByte()
-                if (!state.dragging) {
-                    connectionManager.send(InputEvent.Zoom(scale.toInt()), true)
+                // Calculate the raw distance change in pixels
+                val deltaPixels = detector.currentSpan - detector.previousSpan
+
+                accumulatedZoom += deltaPixels
+                if (abs(accumulatedZoom) >= ZOOM_PIXEL_THRESHOLD) {
+                    // Calculate how many "ticks" this equals
+                    val ticks = (accumulatedZoom / ZOOM_PIXEL_THRESHOLD).toInt()
+                    if (ticks != 0) {
+                        connectionManager.send(InputEvent.Zoom(ticks), true)
+                        // Remove the consumed part, keeping the remainder for smooth scaling
+                        accumulatedZoom -= (ticks * ZOOM_PIXEL_THRESHOLD)
+                    }
                 }
 
                 return true
             }
         })
+//    private val scaleDetector: ScaleGestureDetector =
+//        ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+//            override fun onScale(detector: ScaleGestureDetector): Boolean {
+//                val scale = (ln(detector.scaleFactor) * 500).toInt().coerceIn(-128, 127).toByte()
+//                if (!state.dragging) {
+//                    connectionManager.send(InputEvent.Zoom(scale.toInt()), true)
+//                }
+//
+//                return true
+//            }
+//        })
 
     /**
      * Detector used for gestures like: tap, double tap, move, drag and scroll

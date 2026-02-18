@@ -2,7 +2,7 @@ package com.darusc.mousedroid.networking
 
 import android.util.Log
 import com.darusc.mousedroid.layouts.KeyboardLayout
-import com.darusc.mousedroid.layouts.KeyboardLayoutUS
+import com.darusc.mousedroid.layouts.Keycode
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.bluetooth.HIDReport
 import com.darusc.mousedroid.networking.bluetooth.KeyboardReport
@@ -59,14 +59,20 @@ fun InputEvent.toHIDReport(layout: KeyboardLayout): Array<HIDReport> {
         }
 
         is InputEvent.MouseScroll -> {
-            val report = if (this.dy != 0) {
-                // Vertical scrolling -> mouse wheel rotation
-                MouseReport(0, 0, 0, (this.dy * 0.05).toInt().toByte())
-            } else {
-                // Horizontal scrolling -> CTRL + mouse wheel rotation
-                TODO()
+            val reports = arrayListOf<HIDReport>()
+
+            val vScroll = (this.dy / 10).coerceIn(-127, 127).toByte()
+            val hScroll = (this.dx / 10).coerceIn(-127, 127).toByte()
+
+            if (vScroll.toInt() != 0) {
+                reports.add(MouseReport(0, 0, 0, vScroll))
+            } else if (hScroll.toInt() != 0) {
+                reports.add(KeyboardReport((Keycode.MOD_LEFT_SHIFT ushr 8).toByte(), 0)) // Hold Shift
+                reports.add(MouseReport(0, 0, 0, hScroll))              // Scroll
+                reports.add(KeyboardReport(0, 0))                       // Release Shift
             }
-            arrayOf(report)
+
+            reports.toTypedArray()
         }
 
         is InputEvent.KeyPress -> {
@@ -78,14 +84,24 @@ fun InputEvent.toHIDReport(layout: KeyboardLayout): Array<HIDReport> {
                 val mapping = layout.getMapping(char)
                 if (mapping != null) {
                     reports.add(KeyboardReport(mapping.modifier, mapping.code)) // KEY pressed
-                    reports.add(KeyboardReport(0,  0))           // KEY released
+                    reports.add(KeyboardReport(0, 0))           // KEY released
                 }
             }
             reports.toTypedArray()
         }
 
         is InputEvent.Zoom -> {
-            TODO()
+            // CTRL + mouse wheel rotation
+            val zoom = this.scale.coerceIn(-127, 127).toByte()
+            if (zoom.toInt() != 0) {
+                arrayOf(
+                    KeyboardReport((Keycode.MOD_LEFT_CTRL ushr 8).toByte()),   // Press CTRL
+                    MouseReport(0, 0, 0, zoom),                 // Scroll
+                    KeyboardReport(0)                                 // Release CTRL
+                )
+            } else {
+                emptyArray()
+            }
         }
     }
 }
