@@ -1,6 +1,9 @@
 package com.darusc.mousedroid.networking
 
+import android.util.Log
 import com.darusc.mousedroid.mkinput.InputEvent
+import com.darusc.mousedroid.networking.bluetooth.HIDReport
+import com.darusc.mousedroid.networking.bluetooth.MouseReport
 
 private object RawSocketEvents {
     const val LCLICK: Byte = 0x01
@@ -14,11 +17,53 @@ private object RawSocketEvents {
     const val ZOOM: Byte = 0x09
 }
 
-/**
- * Translate the input event to bluetooth HID report
- */
-fun InputEvent.toHIDReport(): ByteArray {
+private fun getMouseButtonHIDCode(button: InputEvent.MouseButton): Byte {
+    return when(button) {
+        InputEvent.MouseButton.NONE -> 0
+        InputEvent.MouseButton.LEFT -> 1
+        InputEvent.MouseButton.RIGHT -> 2
+        InputEvent.MouseButton.MIDDLE -> 4
+    }
+}
 
+/**
+ * Translate the input event to 1 or more bluetooth HID reports
+ * (e.g mouse click requires 2 reports -> one for pressing the button and one for releasing)
+ */
+fun InputEvent.toHIDReport(): Array<HIDReport> {
+    Log.d("Mousedroid", this::class.java.toString())
+    return when (this) {
+        is InputEvent.MouseMove -> {
+            val report = MouseReport(getMouseButtonHIDCode(this.button), (-this.dx).toByte(), (-this.dy).toByte(), 0)
+            arrayOf(report)
+        }
+        is InputEvent.MouseClick -> {
+            val r1 = MouseReport(getMouseButtonHIDCode(this.button), 0, 0, 0)
+            val r2 = MouseReport(0, 0, 0, 0)
+            arrayOf(r1, r2)
+        }
+        is InputEvent.MouseDragState -> {
+            val state = if(this.isDown) getMouseButtonHIDCode(this.button) else 0
+            val report = MouseReport(state, 0, 0, 0)
+            arrayOf(report)
+        }
+        is InputEvent.MouseScroll -> {
+            val report = if(this.dy != 0) {
+                // Vertical scrolling -> mouse wheel rotation
+                MouseReport(0, 0, 0, (this.dy * 0.05).toInt().toByte())
+            } else {
+                // Horizontal scrolling -> CTRL + mouse wheel rotation
+                TODO()
+            }
+            arrayOf(report)
+        }
+        is InputEvent.KeyPress -> {
+            TODO()
+        }
+        is InputEvent.Zoom -> {
+            TODO()
+        }
+    }
 }
 
 /**
