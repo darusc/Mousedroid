@@ -12,84 +12,118 @@ import android.widget.PopupWindow
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.darusc.mousedroid.adapters.DeviceAdapter
 import com.darusc.mousedroid.R
+import com.darusc.mousedroid.databinding.FragmentDeviceListBinding
 import com.darusc.mousedroid.getDeviceDetails
-import com.darusc.mousedroid.networking.ConnectionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
-import com.darusc.mousedroid.dim
 import com.darusc.mousedroid.networking.Connection
+import com.darusc.mousedroid.viewmodels.ConnectionViewModel
+import com.darusc.mousedroid.viewmodels.DeviceListViewModel
+import kotlinx.coroutines.launch
 
 class DeviceList : Fragment() {
 
-    private val connectionManager = ConnectionManager.getInstance()
+    private lateinit var binding: FragmentDeviceListBinding
+    private lateinit var loadingPopup: PopupWindow
 
-    private val deviceList: ArrayList<Pair<String, String>> = arrayListOf()
     private lateinit var deviceAdapter: DeviceAdapter
+
+    private val connectionViewModel: ConnectionViewModel by activityViewModels()
+    private val deviceListViewModel: DeviceListViewModel by activityViewModels() {
+        DeviceListViewModel.Factory(
+            requireActivity().getSharedPreferences("devices", Context.MODE_PRIVATE)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_device_list, container, false)
+    ): View {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_device_list, container, false)
+
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+
+        loadingPopup = PopupWindow (
+            layoutInflater.inflate(R.layout.loading_fragment, null),
+            ConstraintLayout.LayoutParams.MATCH_PARENT,
+            ConstraintLayout.LayoutParams.MATCH_PARENT,
+        )
+
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().getSharedPreferences("devices", Context.MODE_PRIVATE)?.all?.let {
-            for((key, value) in it) {
-                deviceList.add(Pair(key, value as String))
-            }
-        }
-
-        deviceAdapter = DeviceAdapter(requireContext(), deviceList, object : DeviceAdapter.OnItemClickListener {
+        deviceAdapter = DeviceAdapter(arrayListOf(), object : DeviceAdapter.OnItemClickListener {
             override fun onItemLongClick(position: Int) {
-                showDeleteDialog(position)
+                val name = deviceAdapter.devices[position].first
+                showDeleteDialog(name)
             }
 
             @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun onItemClick(address: String) {
                 val details = getDeviceDetails(requireContext(), Connection.Mode.WIFI)
-                connectionManager.connectWIFI(address, 6969, details)
+                connectionViewModel.connectInWifiMode(address, 6969, details)
             }
         })
-
-        view.findViewById<RecyclerView>(R.id.recyclerView).apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = deviceAdapter
-        }
+        binding.recyclerView.adapter = deviceAdapter
 
         view.findViewById<MaterialButton>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
         view.findViewById<MaterialButton>(R.id.btnAddDevice).setOnClickListener { showAddDeviceDialog() }
-    }
 
-    private fun removeFromPreferences(key: String) {
-        requireActivity()
-            .getSharedPreferences("devices", Context.MODE_PRIVATE)
-            .edit()
-            .apply {
-                remove(key)
-                apply()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    deviceListViewModel.state.collect {
+                        deviceAdapter.devices.clear()
+                        deviceAdapter.devices.addAll(it.devices)
+                        deviceAdapter.notifyDataSetChanged()
+                    }
+                }
+
+                launch {
+                    connectionViewModel.state.collect {
+                        when(it) {
+                            is ConnectionViewModel.State.Connecting -> {
+                                if(!loadingPopup.isShowing) {
+                                    loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
+                                }
+                            }
+                            is ConnectionViewModel.State.Idle -> loadingPopup.dismiss()
+                            is ConnectionViewModel.State.Connected -> loadingPopup.dismiss()
+                        }
+                    }
+                }
+
+                launch {
+                    connectionViewModel.events.collect {
+                        when(it) {
+                            is ConnectionViewModel.Event.NavigateToInput -> findNavController().navigate(R.id.action_devicelist_to_touchpad)
+                            is ConnectionViewModel.Event.NavigateToMain -> findNavController().popBackStack(R.id.mainFragment, false)
+                            is ConnectionViewModel.Event.ConnectionDisconnected -> showPopupDialog(R.layout.connection_disconnected_fragment)
+                            is ConnectionViewModel.Event.ConnectionFailed -> showPopupDialog(R.layout.connection_failed_fragment)
+                            else -> { }
+                        }
+                    }
+                }
             }
+        }
     }
 
-    private fun addToPreferences(key: String, value: String) {
-        requireActivity()
-            .getSharedPreferences("devices", Context.MODE_PRIVATE)
-            .edit()
-            .apply {
-                putString(key, value)
-                apply()
-            }
-    }
-
-    private fun showDeleteDialog(position: Int){
+    private fun showDeleteDialog(name: String){
         val pView = layoutInflater.inflate(R.layout.device_delete_fragment, null)
         val popup = PopupWindow(
             pView,
@@ -99,11 +133,7 @@ class DeviceList : Fragment() {
         )
 
         pView.findViewById<MaterialButton>(R.id.deviceDeleteConfirm).setOnClickListener {
-            removeFromPreferences(deviceList[position].first)
-
-            deviceList.removeAt(position)
-            deviceAdapter.notifyDataSetChanged()
-
+            deviceListViewModel.remove(name)
             popup.dismiss()
         }
 
@@ -135,11 +165,7 @@ class DeviceList : Fragment() {
         }
 
         deviceAddBtn.setOnClickListener {
-            deviceList.add(name.text.toString() to address.text.toString())
-            deviceAdapter.notifyItemInserted(deviceList.size - 1)
-
-            addToPreferences(name.text.toString(), address.text.toString())
-
+            deviceListViewModel.add(name.text.toString(), address.text.toString())
             popup.dismiss()
         }
 

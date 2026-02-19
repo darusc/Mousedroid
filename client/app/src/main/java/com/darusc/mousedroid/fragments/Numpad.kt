@@ -21,9 +21,38 @@ class Numpad : Fragment() {
         return inflater.inflate(R.layout.fragment_numpad, container, false)
     }
 
-    companion object {
-        fun onNumpadButtonClickListener(view: View) {
-            ConnectionManager.getInstance().send(InputEvent.KeyPress(byteArrayOf(view.tag.toString().toByte())), true)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupNumpadButtons(view as ViewGroup)
+    }
+
+    private fun setupNumpadButtons(viewGroup: ViewGroup) {
+        for (i in 0 until viewGroup.childCount) {
+            val child = viewGroup.getChildAt(i)
+
+            if (child is ViewGroup) {
+                // If it's a container (like your ConstraintLayout), look inside it
+                setupNumpadButtons(child)
+            } else if (child.tag != null) {
+                // If the view has a tag, it's one of our buttons!
+                child.setOnClickListener {
+                    val keyCode = it.tag.toString().toByte()
+                    sendKeyPress(keyCode)
+                }
+            }
         }
+    }
+
+    private fun sendKeyPress(keyCode: Byte) {
+        ConnectionManager.getInstance().send(
+            InputEvent.KeyPress(byteArrayOf(keyCode)),
+            true
+        )
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Reset orientation when leaving Numpad
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 }

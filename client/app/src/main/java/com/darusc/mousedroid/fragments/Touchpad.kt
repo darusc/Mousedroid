@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import com.darusc.mousedroid.mkinput.GestureHandler
 import com.darusc.mousedroid.R
 
-class Touchpad() : Fragment() {
+class Touchpad : Fragment() {
 
     private val TAG = "Mousedroid"
 
@@ -22,5 +22,11 @@ class Touchpad() : Fragment() {
         view.setOnTouchListener(GestureHandler(requireContext()))
 
         return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Reset the orientation when leaving the Touchpad
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
     }
 }

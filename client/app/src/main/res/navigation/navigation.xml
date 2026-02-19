@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.darusc.mousedroid.fragments.Main"
+        tools:layout="@layout/fragment_main">
+
+        <action
+            android:id="@+id/action_main_to_touchpad"
+            app:destination="@id/touchpadFragment"/>
+
+        <action
+            android:id="@+id/action_main_to_devicelist"
+            app:destination="@id/deviceListFragment"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/deviceListFragment"
+        android:name="com.darusc.mousedroid.fragments.DeviceList"
+        tools:layout="@layout/fragment_device_list">
+
+        <action
+            android:id="@+id/action_devicelist_to_touchpad"
+            app:destination="@id/touchpadFragment"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/touchpadFragment"
+        android:name="com.darusc.mousedroid.fragments.Touchpad"
+        tools:layout="@layout/fragment_touchpad">
+
+        <action
+            android:id="@+id/action_touchpad_to_numpad"
+            app:destination="@id/numpadFragment"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/numpadFragment"
+        android:name="com.darusc.mousedroid.fragments.Numpad"
+        tools:layout="@layout/fragment_numpad">
+
+        <action
+            android:id="@+id/action_numpad_to_touchpad"
+            app:destination="@id/touchpadFragment"/>
+
+    </fragment>
+
+</navigation>
