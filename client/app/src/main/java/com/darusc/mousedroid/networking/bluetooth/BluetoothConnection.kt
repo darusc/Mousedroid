@@ -160,7 +160,7 @@ class BluetoothConnection(
 
     override fun send(event: InputEvent) {
         val reports = event.toHIDReport(layout)
-        reportChannel.offer(reports)
+        reportChannel.trySend(reports)
     }
 
     override fun close() {

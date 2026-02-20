@@ -123,12 +123,12 @@ class GestureHandler(context: Context) : View.OnTouchListener {
             }
 
             override fun onScroll(
-                e1: MotionEvent,
+                e1: MotionEvent?,
                 e2: MotionEvent,
                 distanceX: Float,
                 distanceY: Float
             ): Boolean {
-                if ((e1.pointerCount == 2 || e2.pointerCount == 2) || System.currentTimeMillis() - state.lastScrolled < EV_DELAY_MILLIS) {
+                if ((e1?.pointerCount == 2 || e2.pointerCount == 2) || System.currentTimeMillis() - state.lastScrolled < EV_DELAY_MILLIS) {
                     if (abs(distanceX) < SCROLL_TRESHOLD && abs(distanceY) < SCROLL_TRESHOLD) {
                         return super.onScroll(e1, e2, distanceX, distanceY)
                     }
