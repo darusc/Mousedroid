@@ -2,8 +2,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     tools:context=".fragments.Main">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -39,7 +37,7 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConnectUSB"
+            android:id="@+id/btnConnectSV"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_below="@id/textView2"
@@ -48,7 +46,7 @@
             android:layout_centerHorizontal="true"
             android:backgroundTint="#000000"
             android:padding="20dp"
-            android:text="Connect USB"
+            android:text="Connect Server"
             android:textColor="#c9c9c9"
             android:textSize="18sp"
             app:cornerRadius="10dp"
@@ -61,31 +59,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
             app:layout_constraintVertical_bias="0.31"
-            app:layout_constraintWidth_percent="0.7" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConnectWIFI"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignStart="@id/textView2"
-            android:layout_alignEnd="@id/textView2"
-            android:layout_centerHorizontal="true"
-            android:backgroundTint="#000000"
-            android:padding="20dp"
-            android:text="Connect WiFi"
-            android:textColor="#c9c9c9"
-            android:textSize="18sp"
-            app:cornerRadius="10dp"
-            app:icon="@drawable/wifi"
-            app:iconGravity="textStart"
-            app:iconSize="26sp"
-            app:iconTint="#ffffff"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnConnectUSB"
-            app:layout_constraintVertical_bias="0.076"
             app:layout_constraintWidth_percent="0.7" />
 
         <com.google.android.material.button.MaterialButton
@@ -109,7 +82,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnConnectWIFI"
+            app:layout_constraintTop_toBottomOf="@+id/btnConnectSV"
             app:layout_constraintVertical_bias="0.076"
             app:layout_constraintWidth_percent="0.7" />
 
