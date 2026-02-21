@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -20,8 +21,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.databinding.FragmentMainBinding
+import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.viewmodels.ConnectionViewModel
 import kotlinx.coroutines.launch
+import org.w3c.dom.Text
 
 class Main : Fragment() {
 
@@ -37,7 +40,7 @@ class Main : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
 
-        loadingPopup = PopupWindow (
+        loadingPopup = PopupWindow(
             layoutInflater.inflate(R.layout.loading_fragment, null),
             ConstraintLayout.LayoutParams.MATCH_PARENT,
             ConstraintLayout.LayoutParams.MATCH_PARENT,
@@ -51,16 +54,12 @@ class Main : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnConnectUSB.setOnClickListener  {
-            viewModel.connectInUSBMode(requireContext())
-        }
-
-        binding.btnConnectWIFI.setOnClickListener {
-            findNavController().navigate(R.id.action_main_to_devicelist)
+        binding.btnConnectSV.setOnClickListener {
+            viewModel.startServerMode(requireContext())
         }
 
         binding.btnConnectBT.setOnClickListener {
-            viewModel.connectInBluetoothMode(requireContext())
+            viewModel.startBluetoothMode(requireContext())
         }
 
 
@@ -68,12 +67,14 @@ class Main : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.state.collect {
-                        when(it) {
+                        when (it) {
                             is ConnectionViewModel.State.Connecting -> {
-                                if(!loadingPopup.isShowing) {
+                                if (!loadingPopup.isShowing) {
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
                                     loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
                                 }
                             }
+
                             is ConnectionViewModel.State.Idle -> loadingPopup.dismiss()
                             is ConnectionViewModel.State.Connected -> loadingPopup.dismiss()
                         }
@@ -82,12 +83,13 @@ class Main : Fragment() {
 
                 launch {
                     viewModel.events.collect {
-                        when(it) {
+                        when (it) {
                             is ConnectionViewModel.Event.NavigateToInput -> findNavController().navigate(R.id.action_main_to_touchpad)
-                            is ConnectionViewModel.Event.NavigateToMain -> { }
+                            is ConnectionViewModel.Event.NavigateToDeviceList -> findNavController().navigate(R.id.action_main_to_devicelist)
+                            is ConnectionViewModel.Event.NavigateToMain -> {}
                             is ConnectionViewModel.Event.ConnectionDisconnected -> showPopupDialog(R.layout.connection_disconnected_fragment)
                             is ConnectionViewModel.Event.ConnectionFailed -> showPopupDialog(R.layout.connection_failed_fragment)
-                            else -> { }
+                            else -> {}
                         }
                     }
                 }

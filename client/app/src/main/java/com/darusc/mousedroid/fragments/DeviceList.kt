@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
@@ -98,7 +99,8 @@ class DeviceList : Fragment() {
                     connectionViewModel.state.collect {
                         when(it) {
                             is ConnectionViewModel.State.Connecting -> {
-                                if(!loadingPopup.isShowing) {
+                                if (!loadingPopup.isShowing) {
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
                                     loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
                                 }
                             }

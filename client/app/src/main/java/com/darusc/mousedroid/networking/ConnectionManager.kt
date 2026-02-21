@@ -52,7 +52,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     private var streamingEnabled = false
 
     interface ConnectionStateCallback {
-        fun onConnectionInitiated() {}
+        fun onConnectionInitiated(mode: Connection.Mode) {}
         fun onConnectionSuccessful(connectionMode: Connection.Mode) {}
         fun onConnectionFailed(connectionMode: Connection.Mode) {}
         fun onDisconnected() {}
@@ -67,7 +67,7 @@ class ConnectionManager private constructor() : Connection.Listener {
      * Tcp socket is used only for connections, commands are sent using Udp
      */
     fun connectWIFI(ipAddress: String, port: Int, deviceDetails: String) {
-        connectionStateCallback?.onConnectionInitiated()
+        connectionStateCallback?.onConnectionInitiated(Connection.Mode.WIFI)
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 tcpConn = TCPConnection(ipAddress, port, false, this@ConnectionManager)
@@ -86,7 +86,7 @@ class ConnectionManager private constructor() : Connection.Listener {
      * Tcp socket is used both for connection and sending commands (adb doesn't allow Udp port forwarding)
      */
     fun connectUSB(port: Int, deviceDetails: String) {
-        connectionStateCallback?.onConnectionInitiated()
+        connectionStateCallback?.onConnectionInitiated(Connection.Mode.USB)
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 tcpConn = TCPConnection("127.0.0.1", port, true, this@ConnectionManager)
@@ -104,6 +104,7 @@ class ConnectionManager private constructor() : Connection.Listener {
      */
     @RequiresApi(Build.VERSION_CODES.P)
     fun connectBluetooth(context: Context) {
+        connectionStateCallback?.onConnectionInitiated(Connection.Mode.BLUETOOTH)
         CoroutineScope(Dispatchers.IO).launch {
             btConn = BluetoothConnection(context, this@ConnectionManager)
         }
@@ -129,6 +130,8 @@ class ConnectionManager private constructor() : Connection.Listener {
 
     override fun onConnected(connectionMode: Connection.Mode) {
         if(connectionMode == Connection.Mode.BLUETOOTH) {
+            // Notify only for bluetooth mode. For USB and WIFI onConnectionSuccessful is called
+            // right after socket creation
             connectionStateCallback?.onConnectionSuccessful(connectionMode)
         }
     }

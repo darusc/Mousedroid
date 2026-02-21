@@ -1,6 +1,5 @@
 package com.darusc.mousedroid.networking.bluetooth
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -14,7 +13,6 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat.startActivity
 import com.darusc.mousedroid.layouts.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
@@ -27,10 +25,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
+@SuppressLint("MissingPermission") // For BLUETOOTH_CONNECT permission
 @RequiresApi(Build.VERSION_CODES.P)
 class BluetoothConnection(
     context: Context,
-    private val listener: Connection.Listener
+    private val listener: Listener
 ) : Connection() {
 
     private val applicationContext = context.applicationContext
@@ -68,7 +67,6 @@ class BluetoothConnection(
     )
 
     private val callback: BluetoothHidDevice.Callback = object : BluetoothHidDevice.Callback() {
-        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChanged(device: BluetoothDevice?, state: Int) {
             super.onConnectionStateChanged(device, state)
 
@@ -86,7 +84,10 @@ class BluetoothConnection(
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> Log.d("Mousedroid", "Disconnecting...")
-                BluetoothProfile.STATE_DISCONNECTED -> Log.d("Mousedroid", "Disconnected!")
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    Log.d("Mousedroid", "Disconnected!")
+                    listener.onDisconnected()
+                }
             }
         }
 
@@ -107,7 +108,6 @@ class BluetoothConnection(
      * Non blocking queue of reports to be sent over the bluetooth connection
      */
     private val reportChannel = Channel<Array<HIDReport>>(Channel.UNLIMITED)
-    @SuppressLint("MissingPermission")
     private val sendReportJob = CoroutineScope(Dispatchers.IO).launch {
         for (reports in reportChannel) {
             for (report in reports) {
@@ -129,8 +129,13 @@ class BluetoothConnection(
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         }
 
+        // On versions newer than 33 enabling bluetooth requires
+        // starting an intent
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
+            bluetoothAdapter.enable()
+        }
+
         bluetoothAdapter.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
-            @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.HID_DEVICE) {
                     bluetoothHIDDevice = proxy as BluetoothHidDevice
