@@ -1,5 +1,7 @@
 package com.darusc.mousedroid.networking.bluetooth
 
+import kotlin.experimental.and
+
 /**
  * Base HID Report class
  */
@@ -33,4 +35,15 @@ class KeyboardReport(
 ): HIDReport(
     byteArrayOf(modifier, 0x00, *keys.copyOf(6)),
     REPORT_ID_KEYBOARD
+)
+
+/**
+ * Media HID report
+ * @param bitmask The corresponding bitmask activating the bit corresponding to the media action
+ */
+class MediaReport(
+    bitmask: Short
+): HIDReport(
+    byteArrayOf((bitmask and 0xFF).toByte(), ((bitmask.toInt() shr 8) and 0xFF).toByte()),
+    REPORT_ID_MEDIA
 )

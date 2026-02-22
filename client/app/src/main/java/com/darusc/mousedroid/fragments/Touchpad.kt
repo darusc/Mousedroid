@@ -12,12 +12,16 @@ import com.darusc.mousedroid.R
 import com.darusc.mousedroid.databinding.FragmentTouchpadBinding
 import androidx.core.view.isGone
 import androidx.core.view.setPadding
+import androidx.fragment.app.activityViewModels
 import androidx.transition.TransitionManager
+import com.darusc.mousedroid.viewmodels.TouchpadViewModel
 
 class Touchpad : Fragment() {
 
     private val TAG = "Mousedroid"
     private lateinit var binding: FragmentTouchpadBinding
+
+    private val viewModel: TouchpadViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,6 +29,7 @@ class Touchpad : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_touchpad, container, false)
+        binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -35,8 +40,8 @@ class Touchpad : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup touchpad gesture listener
-        //binding.touchpadSensor.setOnTouchListener(GestureHandler(requireContext()))
+        // Setup touchpad gesture listener and button listeners
+        binding.touchpadSensor.setOnTouchListener(viewModel.createGestureHandler(requireContext()))
 
         // Multimedia dropdown
         binding.btnToggleMedia.setOnClickListener {

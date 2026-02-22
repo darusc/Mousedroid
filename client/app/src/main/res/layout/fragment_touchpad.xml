@@ -2,6 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.darusc.mousedroid.viewmodels.TouchpadViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,8 +47,8 @@
                 android:backgroundTint="#00000000"
                 app:icon="@drawable/ic_fullscreen"
                 app:iconGravity="textStart"
-                app:iconTint="@color/white"
                 app:iconPadding="0dp"
+                app:iconTint="@color/white"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent" />
 
             <View
@@ -65,8 +71,9 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:onClick="@{viewmodel::onMouseButtonClick}"
                 android:text="Left" />
 
             <com.google.android.material.button.MaterialButton
@@ -74,8 +81,9 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:onClick="@{viewmodel::onMouseButtonClick}"
                 android:text="Middle" />
 
             <com.google.android.material.button.MaterialButton
@@ -84,6 +92,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:onClick="@{viewmodel::onMouseButtonClick}"
                 android:text="Right" />
         </LinearLayout>
 
@@ -94,47 +103,41 @@
             android:layout_height="wrap_content"
             android:text="Multimedia Controls"
             android:textColor="#888888"
-            app:iconTint="#888888"
             app:icon="@drawable/ic_arrow_drop_down"
             app:iconGravity="textEnd"
+            app:iconTint="#888888"
             app:layout_constraintBottom_toTopOf="@id/mediaControls"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/mediaControls"
-            android:layout_marginLeft="18dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
             android:gravity="center"
             app:chipSpacingHorizontal="18dp"
             app:chipSpacingVertical="18dp"
-            app:singleLine="false"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:singleLine="false">
 
             <ImageButton
                 android:id="@+id/btnPrev"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
                 android:src="@drawable/ic_skip_previos"
                 app:tint="@color/white" />
 
             <ImageButton
-                android:id="@+id/btnPlay"
+                android:id="@+id/btnPlayPause"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
-                android:src="@drawable/ic_play"
-                app:tint="@color/white" />
-
-            <ImageButton
-                android:id="@+id/btnPause"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/rounded_control"
-                android:src="@drawable/ic_pause"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
+                android:src="@drawable/ic_play_pause"
                 app:tint="@color/white" />
 
             <ImageButton
@@ -142,7 +145,17 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
                 android:src="@drawable/ic_skip_next"
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnReplay10"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
+                android:src="@drawable/ic_replay_10"
                 app:tint="@color/white" />
 
             <ImageButton
@@ -150,46 +163,48 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
                 android:src="@drawable/ic_forward_10"
-                app:tint="@color/white"/>
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                app:tint="@color/white" />
 
             <ImageButton
                 android:id="@+id/btnVolDown"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
                 android:src="@drawable/ic_volume_down"
-                app:tint="@color/white"/>
-
-            <ImageButton
-                android:id="@+id/btnVolUp"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/rounded_control"
-                android:src="@drawable/ic_volume_up"
-                app:tint="@color/white"/>
+                app:tint="@color/white" />
 
             <ImageButton
                 android:id="@+id/btnVolOff"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
                 android:src="@drawable/ic_volume_off"
-                app:tint="@color/white"/>
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnVolUp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:onClick="@{viewmodel::onMediaButtonClick}"
+                android:src="@drawable/ic_volume_up"
+                app:tint="@color/white" />
 
             <ImageButton
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rounded_control"
-                app:tint="@color/white"/>
-
-            <ImageButton
-                android:id="@+id/btnReplay10"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/rounded_control"
-                android:src="@drawable/ic_replay_10"
-                app:tint="@color/white"/>
+                app:tint="@color/white" />
 
         </com.google.android.material.chip.ChipGroup>
 

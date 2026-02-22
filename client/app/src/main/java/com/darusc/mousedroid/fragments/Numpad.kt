@@ -1,58 +1,31 @@
 package com.darusc.mousedroid.fragments
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import com.darusc.mousedroid.mkinput.InputEvent
+import androidx.fragment.app.activityViewModels
 import com.darusc.mousedroid.R
-import com.darusc.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.databinding.FragmentNumpadBinding
+import com.darusc.mousedroid.viewmodels.NumpadViewModel
 
 class Numpad : Fragment() {
+
+    private lateinit var binding: FragmentNumpadBinding
+
+    private val viewModel: NumpadViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        return inflater.inflate(R.layout.fragment_numpad, container, false)
-    }
+    ): View {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_numpad, container, false)
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupNumpadButtons(view as ViewGroup)
-    }
-
-    private fun setupNumpadButtons(viewGroup: ViewGroup) {
-        for (i in 0 until viewGroup.childCount) {
-            val child = viewGroup.getChildAt(i)
-
-            if (child is ViewGroup) {
-                // If it's a container (like your ConstraintLayout), look inside it
-                setupNumpadButtons(child)
-            } else if (child.tag != null) {
-                // If the view has a tag, it's one of our buttons!
-                child.setOnClickListener {
-                    val keyCode = it.tag.toString().toByte()
-                    sendKeyPress(keyCode)
-                }
-            }
-        }
-    }
-
-    private fun sendKeyPress(keyCode: Byte) {
-        ConnectionManager.getInstance().send(
-            InputEvent.KeyPress(byteArrayOf(keyCode)),
-            true
-        )
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        // Reset orientation when leaving Numpad
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        return binding.root
     }
 }

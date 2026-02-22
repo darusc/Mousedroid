@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="16dp">
 
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.darusc.mousedroid.viewmodels.NumpadViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -13,12 +19,12 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="horizontal"
-            app:constraint_referenced_ids="num7,num8,num9,numdiv,num4,num5,num6,nummultiply,num1,num2,num3,numminus,num0,numdot,numback,numenter"
+            app:constraint_referenced_ids="num7,num8,num9,numdiv,num4,num5,num6,nummultiply,num1,num2,num3,numminus,numdot,num0,numenter,numplus"
+            app:flow_horizontalGap="2dp"
+            app:flow_horizontalStyle="spread"
             app:flow_maxElementsWrap="4"
             app:flow_verticalGap="2dp"
-            app:flow_horizontalGap="2dp"
             app:flow_wrapMode="aligned"
-            app:flow_horizontalStyle="spread"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -27,100 +33,102 @@
         <Button
             android:id="@+id/num7"
             style="@style/NumpadKey"
-            android:tag="55"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="7" />
 
         <Button
             android:id="@+id/num8"
             style="@style/NumpadKey"
-            android:tag="56"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="8" />
 
         <Button
             android:id="@+id/num9"
             style="@style/NumpadKey"
-            android:tag="57"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="9" />
 
         <Button
             android:id="@+id/numdiv"
             style="@style/NumpadKey"
-            android:tag="47"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="/" />
 
         <Button
             android:id="@+id/num4"
             style="@style/NumpadKey"
-            android:tag="52"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="4" />
 
         <Button
             android:id="@+id/num5"
             style="@style/NumpadKey"
-            android:tag="53"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="5" />
 
         <Button
             android:id="@+id/num6"
             style="@style/NumpadKey"
-            android:tag="54"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="6" />
 
         <Button
             android:id="@+id/nummultiply"
             style="@style/NumpadKey"
-            android:tag="42"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="*" />
 
         <Button
             android:id="@+id/num1"
             style="@style/NumpadKey"
-            android:tag="49"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="1" />
 
         <Button
             android:id="@+id/num2"
             style="@style/NumpadKey"
-            android:tag="50"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="2" />
 
         <Button
             android:id="@+id/num3"
             style="@style/NumpadKey"
-            android:tag="51"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="3" />
 
         <Button
             android:id="@+id/numminus"
             style="@style/NumpadKey"
-            android:tag="45"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="-" />
+
+        <Button
+            android:id="@+id/numplus"
+            style="@style/NumpadKey"
+            android:onClick="@{viewmodel::onButtonClick}"
+            android:text="+" />
 
         <Button
             android:id="@+id/num0"
             style="@style/NumpadKey"
-            android:tag="48"
+            android:onClick="@{viewmodel::onButtonClick}"
             android:text="0" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/numdot"
             style="@style/NumpadKey"
-            android:tag="46"
-            android:text="." />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/numback"
-            style="@style/NumpadKey"
-            android:tag="127"
-            app:iconGravity="textEnd"
-            app:icon="@drawable/backspace_vector" />
+            android:onClick="@{viewmodel::onButtonClick}"
+            android:onLongClick="@{viewmodel::onButtonLongClick}"
+            android:text="."
+            app:icon="@drawable/backspace_vector"
+            app:iconGravity="textEnd" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/numenter"
             style="@style/NumpadKey"
-            android:tag="10"
-            app:iconGravity="textStart"
-            app:icon="@drawable/enter_vector" />
+            android:onClick="@{viewmodel::onButtonClick}"
+            app:icon="@drawable/enter_vector"
+            app:iconGravity="textStart" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

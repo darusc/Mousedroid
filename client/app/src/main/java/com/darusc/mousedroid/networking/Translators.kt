@@ -6,8 +6,20 @@ import com.darusc.mousedroid.layouts.Keycode
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.bluetooth.HIDReport
 import com.darusc.mousedroid.networking.bluetooth.KeyboardReport
+import com.darusc.mousedroid.networking.bluetooth.MediaReport
 import com.darusc.mousedroid.networking.bluetooth.MouseReport
 
+/**
+ * HID usage IDs used in translating the events into raw bytes for the HID protocol
+ * are taken from the official usb specification
+ *
+ * https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
+ */
+
+
+/**
+ * Socket events for the TCP/UDP communication
+ */
 private object RawSocketEvents {
     const val LCLICK: Byte = 0x01
     const val RCLICK: Byte = 0x02
@@ -26,6 +38,46 @@ private fun getMouseButtonHIDCode(button: InputEvent.MouseButton): Byte {
         InputEvent.MouseButton.LEFT -> 1
         InputEvent.MouseButton.RIGHT -> 2
         InputEvent.MouseButton.MIDDLE -> 4
+    }
+}
+
+/**
+ * Transforms a media action into its corresponding bitmask.
+ * The activated bit is the corresponding to the position
+ * of the action in the descriptor listing
+ */
+private fun getMediaActionHIDBitmask(action: InputEvent.MediaAction): Short {
+    return when(action) {
+        InputEvent.MediaAction.FORWARD       -> 0b0000000000000001 // First in the descriptor listing
+        InputEvent.MediaAction.REPLAY        -> 0b0000000000000010 // Second in the descriptor listing
+        InputEvent.MediaAction.NEXT          -> 0b0000000000000100 // ...
+        InputEvent.MediaAction.PREVIOUS      -> 0b0000000000001000
+        InputEvent.MediaAction.PLAY_PAUSE    -> 0b0000000000010000
+        InputEvent.MediaAction.VOLUME_MUTE   -> 0b0000000000100000
+        InputEvent.MediaAction.VOLUME_UP     -> 0b0000000001000000
+        InputEvent.MediaAction.VOLUME_DOWN   -> 0b0000000010000000
+    }
+}
+
+private fun getNumpadKeyHIDUsageID(numpadKey: InputEvent.NumpadKey): Byte {
+    return when(numpadKey) {
+        InputEvent.NumpadKey.NUM1 -> 0x59.toByte()
+        InputEvent.NumpadKey.NUM2 -> 0x5A.toByte()
+        InputEvent.NumpadKey.NUM3 -> 0x5B.toByte()
+        InputEvent.NumpadKey.NUM4 -> 0x5C.toByte()
+        InputEvent.NumpadKey.NUM5 -> 0x5D.toByte()
+        InputEvent.NumpadKey.NUM6 -> 0x5E.toByte()
+        InputEvent.NumpadKey.NUM7 -> 0x5F.toByte()
+        InputEvent.NumpadKey.NUM8 -> 0x60.toByte()
+        InputEvent.NumpadKey.NUM9 -> 0x61.toByte()
+        InputEvent.NumpadKey.NUM0 -> 0x62.toByte()
+        InputEvent.NumpadKey.NUM_DOT -> 0x63.toByte()
+        InputEvent.NumpadKey.NUM_ENTER -> 0x58.toByte()
+        InputEvent.NumpadKey.NUM_PLUS  -> 0x57.toByte()
+        InputEvent.NumpadKey.NUM_MINUS -> 0x56.toByte()
+        InputEvent.NumpadKey.NUM_MULTIPLY -> 0x55.toByte()
+        InputEvent.NumpadKey.NUM_DIV -> 0x54.toByte()
+        InputEvent.NumpadKey.NUM_DEL -> 0x2A.toByte()
     }
 }
 
@@ -103,6 +155,19 @@ fun InputEvent.toHIDReport(layout: KeyboardLayout): Array<HIDReport> {
                 emptyArray()
             }
         }
+
+        is InputEvent.NumpadKeyPress -> {
+            val usageid = getNumpadKeyHIDUsageID(this.key)
+            arrayOf(
+                KeyboardReport(0x00, usageid),
+                KeyboardReport(0)
+            )
+        }
+
+        is InputEvent.MediaEvent -> {
+            val bitmask = getMediaActionHIDBitmask(this.action)
+            arrayOf(MediaReport(bitmask), MediaReport(0))
+        }
     }
 }
 
@@ -141,5 +206,7 @@ fun InputEvent.toSocketReport(): ByteArray {
         is InputEvent.KeyPress -> {
             byteArrayOf(RawSocketEvents.KEYPRESS) + this.activeBytes
         }
+
+        else -> byteArrayOf()
     }
 }

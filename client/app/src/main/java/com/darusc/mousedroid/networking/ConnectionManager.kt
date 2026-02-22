@@ -117,7 +117,7 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
     }
 
-    fun send(event: InputEvent, withCoroutine: Boolean) {
+    fun send(event: InputEvent, withCoroutine: Boolean = true) {
         if (connection == null) {
             return;
         }

@@ -2,7 +2,11 @@ package com.darusc.mousedroid.networking.bluetooth
 
 const val REPORT_ID_KEYBOARD = 0x01
 const val REPORT_ID_MOUSE = 0x02
+const val REPORT_ID_MEDIA = 0x03
 
+/**
+ * https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
+ */
 val HID_REPORT_DESC = byteArrayOf(
     // KEYBOARD
     0x05.toByte(), 0x01.toByte(),  // Usage Page (Generic Desktop Ctrls)
@@ -67,5 +71,25 @@ val HID_REPORT_DESC = byteArrayOf(
     0x95.toByte(), 0x03.toByte(),  //     Report Count (3)
     0x81.toByte(), 0x06.toByte(),  //     Input (Data,Var,Rel)
     0xC0.toByte(),  //   End Collection
-    0xC0.toByte() // End Collection
+    0xC0.toByte(), // End Collection
+
+    // Consumer control (Media)
+    0x05.toByte(), 0x0C.toByte(),                  // USAGE_PAGE (Consumer Devices)
+    0x09.toByte(), 0x01.toByte(),                  // USAGE (Consumer Control)
+    0xA1.toByte(), 0x01.toByte(),                  // COLLECTION (Application)
+    0x85.toByte(), REPORT_ID_MEDIA.toByte(),       //   REPORT_ID (3) - Use a unique ID
+    0x15.toByte(), 0x00.toByte(),                  //   LOGICAL_MINIMUM (0)
+    0x25.toByte(), 0x01.toByte(),                  //   LOGICAL_MAXIMUM (1)
+    0x75.toByte(), 0x01.toByte(),                  //   REPORT_SIZE (1)
+    0x95.toByte(), 0x10.toByte(),                  //   REPORT_COUNT (16) - 16 bits for 16 different keys
+    0x09.toByte(), 0xB3.toByte(),                  //   USAGE (Fast Forward) -> Jump Forward
+    0x09.toByte(), 0xB4.toByte(),                  //   USAGE (Rewind) -> Jump Backward
+    0x09.toByte(), 0xB5.toByte(),                  //   USAGE (Scan Next Track)
+    0x09.toByte(), 0xB6.toByte(),                  //   USAGE (Scan Previous Track)
+    0x09.toByte(), 0xCD.toByte(),                  //   USAGE (Play/Pause)
+    0x09.toByte(), 0xE2.toByte(),                  //   USAGE (Mute)
+    0x09.toByte(), 0xE9.toByte(),                  //   USAGE (Volume Up)
+    0x09.toByte(), 0xEA.toByte(),                  //   USAGE (Volume Down)
+    0x81.toByte(), 0x02.toByte(),                  //   INPUT (Data,Var,Abs)
+    0xC0.toByte()                                  // END_COLLECTION
 )
