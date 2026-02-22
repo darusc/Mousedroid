@@ -1,9 +1,197 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/touchpadFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:hapticFeedbackEnabled="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_dark"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Touchpad"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/touchpadContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/touchpad_bg"
+            app:layout_constraintBottom_toTopOf="@+id/mouseButtonsRow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFullscreen"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:backgroundTint="#00000000"
+                app:icon="@drawable/ic_fullscreen"
+                app:iconGravity="textStart"
+                app:iconTint="@color/white"
+                app:iconPadding="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent" />
+
+            <View
+                android:id="@+id/touchpadSensor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.1" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/mouseButtonsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/btnToggleMedia">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLeftClick"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Left" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMiddleClick"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Middle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRightClick"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Right" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToggleMedia"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Multimedia Controls"
+            android:textColor="#888888"
+            app:iconTint="#888888"
+            app:icon="@drawable/ic_arrow_drop_down"
+            app:iconGravity="textEnd"
+            app:layout_constraintBottom_toTopOf="@id/mediaControls"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/mediaControls"
+            android:layout_marginLeft="18dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            app:chipSpacingHorizontal="18dp"
+            app:chipSpacingVertical="18dp"
+            app:singleLine="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageButton
+                android:id="@+id/btnPrev"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_skip_previos"
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_play"
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnPause"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_pause"
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnNext"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_skip_next"
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnForward10"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_forward_10"
+                app:tint="@color/white"/>
+
+            <ImageButton
+                android:id="@+id/btnVolDown"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_volume_down"
+                app:tint="@color/white"/>
+
+            <ImageButton
+                android:id="@+id/btnVolUp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_volume_up"
+                app:tint="@color/white"/>
+
+            <ImageButton
+                android:id="@+id/btnVolOff"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_volume_off"
+                app:tint="@color/white"/>
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                app:tint="@color/white"/>
+
+            <ImageButton
+                android:id="@+id/btnReplay10"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_control"
+                android:src="@drawable/ic_replay_10"
+                app:tint="@color/white"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

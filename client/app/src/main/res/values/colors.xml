@@ -10,6 +10,12 @@
     <color name="toolbar_text">#c9c9c9</color>
     <color name="primary">#007bed</color>
 
+    <color name="bg_dark">#121212</color>
+    <color name="accent_blue">#00E5FF</color>
+    <color name="card_gray">#1E1E1E</color>
+    <color name="button_gray">#2C2C2C</color>
+    <color name="white">#FFFFFF</color>
+
     <color name="seed">#6750A4</color>
     <color name="md_theme_light_primary">#6750A4</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
