@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/inputFragment">
 
     <fragment
         android:id="@+id/mainFragment"
@@ -12,7 +12,7 @@
 
         <action
             android:id="@+id/action_main_to_touchpad"
-            app:destination="@id/touchpadFragment"/>
+            app:destination="@id/inputFragment"/>
 
         <action
             android:id="@+id/action_main_to_devicelist"
@@ -27,29 +27,14 @@
 
         <action
             android:id="@+id/action_devicelist_to_touchpad"
-            app:destination="@id/touchpadFragment"/>
+            app:destination="@id/inputFragment"/>
 
     </fragment>
 
     <fragment
-        android:id="@+id/touchpadFragment"
-        android:name="com.darusc.mousedroid.fragments.Touchpad"
-        tools:layout="@layout/fragment_touchpad">
-
-        <action
-            android:id="@+id/action_touchpad_to_numpad"
-            app:destination="@id/numpadFragment"/>
-
-    </fragment>
-
-    <fragment
-        android:id="@+id/numpadFragment"
-        android:name="com.darusc.mousedroid.fragments.Numpad"
-        tools:layout="@layout/fragment_numpad">
-
-        <action
-            android:id="@+id/action_numpad_to_touchpad"
-            app:destination="@id/touchpadFragment"/>
+        android:id="@+id/inputFragment"
+        android:name="com.darusc.mousedroid.fragments.Input"
+        tools:layout="@layout/fragment_input">
 
     </fragment>
 

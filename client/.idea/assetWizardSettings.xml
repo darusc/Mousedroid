@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/add/baseline_add_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/arrow_drop_up/baseline_arrow_drop_up_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -33,7 +33,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="baseline_add_24" />
+                            <entry key="color" value="c9c9c9" />
+                            <entry key="outputName" value="ic_arrow_drop_up" />
                             <entry key="sourceFile" value="D:\Projects\Mousedroid\client" />
                           </map>
                         </option>

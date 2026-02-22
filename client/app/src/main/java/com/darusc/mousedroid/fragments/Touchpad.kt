@@ -55,17 +55,12 @@ class Touchpad : Fragment() {
 
             if(currentOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                updateLayoutForOrientation(false)
             } else {
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                updateLayoutForOrientation(true)
             }
         }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-
-        val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
-        updateLayoutForOrientation(isLandscape)
     }
 
     override fun onDestroyView() {

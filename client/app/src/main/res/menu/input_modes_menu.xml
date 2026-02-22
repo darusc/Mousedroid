@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Input Methods">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/mode_touchpad"
+                    android:title="Touchpad" />
+                <item
+                    android:id="@+id/mode_numpad"
+                    android:title="Numpad" />
+                <item
+                    android:id="@+id/mode_keyboard"
+                    android:title="Keyboard" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="Session">
+        <menu>
+            <item
+                android:id="@+id/mode_disconnect"
+                android:title="Disconnect" />
+        </menu>
+    </item>
+</menu>
