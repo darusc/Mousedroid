@@ -47,3 +47,10 @@ class MediaReport(
     byteArrayOf((bitmask and 0xFF).toByte(), ((bitmask.toInt() shr 8) and 0xFF).toByte()),
     REPORT_ID_MEDIA
 )
+
+class BatteryReport(
+    percentage: Int
+): HIDReport(
+    byteArrayOf(percentage.toByte()),
+    REPORT_ID_BATTERY
+)

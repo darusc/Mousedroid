@@ -3,6 +3,7 @@ package com.darusc.mousedroid.networking.bluetooth
 const val REPORT_ID_KEYBOARD = 0x01
 const val REPORT_ID_MOUSE = 0x02
 const val REPORT_ID_MEDIA = 0x03
+const val REPORT_ID_BATTERY = 0x04
 
 /**
  * https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
@@ -91,5 +92,23 @@ val HID_REPORT_DESC = byteArrayOf(
     0x09.toByte(), 0xE9.toByte(),                  //   USAGE (Volume Up)
     0x09.toByte(), 0xEA.toByte(),                  //   USAGE (Volume Down)
     0x81.toByte(), 0x02.toByte(),                  //   INPUT (Data,Var,Abs)
+    0xC0.toByte(),                                 // END_COLLECTION
+
+    // Battery report
+    0x05.toByte(), 0x0C.toByte(),                  // USAGE_PAGE (Consumer)
+    0x09.toByte(), 0x01.toByte(),                  // USAGE (Consumer Control)
+    0xA1.toByte(), 0x01.toByte(),                  // COLLECTION (Application)
+    0x85.toByte(), REPORT_ID_BATTERY.toByte(),     //   REPORT_ID (4)
+    0x05.toByte(), 0x01.toByte(),                  //   USAGE_PAGE (Generic Desktop)
+    0x09.toByte(), 0x06.toByte(),                  //   USAGE (Battery System) - Note: Sometimes 0x05, 0x20 for Battery Level
+    0xA1.toByte(), 0x02.toByte(),                  //   COLLECTION (Logical)
+    0x05.toByte(), 0x85.toByte(),                  //     USAGE_PAGE (Battery System)
+    0x09.toByte(), 0x66.toByte(),                  //     USAGE (Percentage Remaining)
+    0x15.toByte(), 0x00.toByte(),                  //     LOGICAL_MINIMUM (0)
+    0x25.toByte(), 0x64.toByte(),                  //     LOGICAL_MAXIMUM (100)
+    0x75.toByte(), 0x08.toByte(),                  //     REPORT_SIZE (8 bits)
+    0x95.toByte(), 0x01.toByte(),                  //     REPORT_COUNT (1)
+    0x81.toByte(), 0x02.toByte(),                  //     INPUT (Data,Var,Abs)
+    0xC0.toByte(),                                 //   END_COLLECTION
     0xC0.toByte()                                  // END_COLLECTION
 )

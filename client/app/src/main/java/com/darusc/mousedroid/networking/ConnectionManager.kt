@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.darusc.mousedroid.BatteryMonitor
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.bluetooth.BluetoothConnection
 import com.darusc.mousedroid.networking.sockets.TCPConnection
@@ -12,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ConnectionManager private constructor() : Connection.Listener {
+class ConnectionManager private constructor() : Connection.Listener, BatteryMonitor.Listener {
 
     private val TAG = "Mousedroid"
 
@@ -36,6 +37,10 @@ class ConnectionManager private constructor() : Connection.Listener {
             }
         }
     }
+    
+    init {
+        BatteryMonitor.getInstance().addListener(this)
+    }
 
     private var connectionStateCallback: ConnectionStateCallback? = null
 
@@ -49,7 +54,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     private val connection
         get() = (udpConn ?: tcpConn ?: btConn) as Connection
 
-    private var streamingEnabled = false
+    private var connected = false
 
     interface ConnectionStateCallback {
         fun onConnectionInitiated(mode: Connection.Mode) {}
@@ -63,10 +68,11 @@ class ConnectionManager private constructor() : Connection.Listener {
     }
 
     override fun onConnected(connectionMode: Connection.Mode) {
-        if(connectionMode == Connection.Mode.BLUETOOTH) {
+        if (connectionMode == Connection.Mode.BLUETOOTH) {
             // Notify only for bluetooth mode. For USB and WIFI onConnectionSuccessful is called
             // right after socket creation
             connectionStateCallback?.onConnectionSuccessful(connectionMode)
+            connected = false
         }
     }
 
@@ -75,6 +81,12 @@ class ConnectionManager private constructor() : Connection.Listener {
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onDisconnected() {
         disconnect()
+    }
+
+    override fun onBatteryPercentChanged(percentage: Int) {
+        if (connected) {
+            connection.send(InputEvent.BatteryEvent(percentage))
+        }
     }
 
     /**
@@ -89,6 +101,7 @@ class ConnectionManager private constructor() : Connection.Listener {
                 udpConn = UDPConnection(ipAddress, port)
                 tcpConn!!.sendBytes(deviceDetails.toByteArray())
                 connectionStateCallback?.onConnectionSuccessful(Connection.Mode.WIFI)
+                connected = true
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
                 connectionStateCallback?.onConnectionFailed(Connection.Mode.WIFI)
@@ -107,6 +120,7 @@ class ConnectionManager private constructor() : Connection.Listener {
                 tcpConn = TCPConnection("127.0.0.1", port, true, this@ConnectionManager)
                 tcpConn!!.sendBytes(deviceDetails.toByteArray())
                 connectionStateCallback?.onConnectionSuccessful(Connection.Mode.USB)
+                connected = true
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
                 connectionStateCallback?.onConnectionFailed(Connection.Mode.USB)
@@ -128,7 +142,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     @RequiresApi(Build.VERSION_CODES.P)
     fun disconnect() {
         CoroutineScope(Dispatchers.IO).launch {
-            streamingEnabled = false
+            connected = false
             udpConn?.close()
             tcpConn?.close()
             btConn?.close()

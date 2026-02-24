@@ -50,4 +50,6 @@ sealed class InputEvent {
     data class NumpadKeyPress(val key: NumpadKey): InputEvent()
 
     data class MediaEvent(val action: MediaAction): InputEvent()
+
+    data class BatteryEvent(val percentage: Int): InputEvent()
 }

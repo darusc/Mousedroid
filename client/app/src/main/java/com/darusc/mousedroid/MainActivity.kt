@@ -1,6 +1,8 @@
 package com.darusc.mousedroid
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -26,6 +28,8 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 1000)
             }
         }
+
+        BatteryMonitor.getInstance().start(applicationContext)
     }
 
     override fun onRequestPermissionsResult(
@@ -51,5 +55,10 @@ class MainActivity : AppCompatActivity() {
                 BluetoothAdapterWrapper.initialize(applicationContext)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        BatteryMonitor.getInstance().stop(applicationContext)
     }
 }

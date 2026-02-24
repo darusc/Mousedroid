@@ -4,6 +4,7 @@ import android.util.Log
 import com.darusc.mousedroid.layouts.KeyboardLayout
 import com.darusc.mousedroid.layouts.Keycode
 import com.darusc.mousedroid.mkinput.InputEvent
+import com.darusc.mousedroid.networking.bluetooth.BatteryReport
 import com.darusc.mousedroid.networking.bluetooth.HIDReport
 import com.darusc.mousedroid.networking.bluetooth.KeyboardReport
 import com.darusc.mousedroid.networking.bluetooth.MediaReport
@@ -167,6 +168,10 @@ fun InputEvent.toHIDReport(layout: KeyboardLayout): Array<HIDReport> {
         is InputEvent.MediaEvent -> {
             val bitmask = getMediaActionHIDBitmask(this.action)
             arrayOf(MediaReport(bitmask), MediaReport(0))
+        }
+
+        is InputEvent.BatteryEvent -> {
+            arrayOf(BatteryReport(this.percentage))
         }
     }
 }
