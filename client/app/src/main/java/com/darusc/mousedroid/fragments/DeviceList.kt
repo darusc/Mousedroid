@@ -77,7 +77,7 @@ class DeviceList : Fragment() {
             @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun onItemClick(address: String) {
                 val details = getDeviceDetails(requireContext(), Connection.Mode.WIFI)
-                connectionViewModel.connectInWifiMode(address, 6969, details)
+                connectionViewModel.startServerMode(address, 6969, details)
             }
         })
         binding.recyclerView.adapter = deviceAdapter

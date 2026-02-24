@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.darusc.mousedroid.networking.bluetooth.BluetoothAdapterWrapper
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +47,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
+            } else {
+                BluetoothAdapterWrapper.initialize(applicationContext)
             }
         }
     }

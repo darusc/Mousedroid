@@ -1,14 +1,21 @@
 package com.darusc.mousedroid.fragments
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -21,10 +28,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.databinding.FragmentMainBinding
-import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.viewmodels.ConnectionViewModel
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 
 class Main : Fragment() {
 
@@ -32,6 +37,24 @@ class Main : Fragment() {
     private lateinit var loadingPopup: PopupWindow
 
     private val viewModel: ConnectionViewModel by activityViewModels()
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.P)
+    private val settingsLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            viewModel.startBluetoothMode(requireContext())
+        }
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.P)
+    private val enableBluetoothLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                viewModel.startBluetoothMode(requireContext(), true)
+            } else {
+                Toast.makeText(context, "Bluetooth is required for this mode.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +85,11 @@ class Main : Fragment() {
             viewModel.startBluetoothMode(requireContext())
         }
 
+        binding.btnPairBT.setOnClickListener {
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+            settingsLauncher.launch(intent)
+        }
+
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -70,7 +98,8 @@ class Main : Fragment() {
                         when (it) {
                             is ConnectionViewModel.State.Connecting -> {
                                 if (!loadingPopup.isShowing) {
-                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text =
+                                        it.message
                                     loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
                                 }
                             }
@@ -84,16 +113,34 @@ class Main : Fragment() {
                 launch {
                     viewModel.events.collect {
                         when (it) {
-                            is ConnectionViewModel.Event.NavigateToInput -> findNavController().navigate(R.id.action_main_to_touchpad)
-                            is ConnectionViewModel.Event.NavigateToDeviceList -> findNavController().navigate(R.id.action_main_to_devicelist)
+                            is ConnectionViewModel.Event.NavigateToInput -> {
+                                findNavController().navigate(R.id.action_main_to_touchpad)
+                            }
+                            is ConnectionViewModel.Event.NavigateToDeviceList -> {
+                                findNavController().navigate(R.id.action_main_to_devicelist)
+                            }
                             is ConnectionViewModel.Event.NavigateToMain -> {}
-                            is ConnectionViewModel.Event.ConnectionDisconnected -> showPopupDialog(R.layout.connection_disconnected_fragment)
-                            is ConnectionViewModel.Event.ConnectionFailed -> showPopupDialog(R.layout.connection_failed_fragment)
+                            is ConnectionViewModel.Event.ConnectionDisconnected -> {
+                                showPopupDialog(R.layout.connection_disconnected_fragment)
+                            }
+                            is ConnectionViewModel.Event.ConnectionFailed -> {
+                                showPopupDialog(R.layout.connection_failed_fragment)
+                            }
+                            is ConnectionViewModel.Event.EnableBluetooth -> {
+                                val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                                enableBluetoothLauncher.launch(intent)
+                            }
                             else -> {}
                         }
                     }
                 }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.disconnect()
     }
 }

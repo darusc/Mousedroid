@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/arrow_drop_up/baseline_arrow_drop_up_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/bluetooth/baseline_bluetooth_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,7 +34,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="c9c9c9" />
-                            <entry key="outputName" value="ic_arrow_drop_up" />
+                            <entry key="outputName" value="baseline_bluetooth_24" />
                             <entry key="sourceFile" value="D:\Projects\Mousedroid\client" />
                           </map>
                         </option>

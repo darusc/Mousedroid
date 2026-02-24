@@ -62,6 +62,21 @@ class ConnectionManager private constructor() : Connection.Listener {
         this.connectionStateCallback = connectionStateCallback
     }
 
+    override fun onConnected(connectionMode: Connection.Mode) {
+        if(connectionMode == Connection.Mode.BLUETOOTH) {
+            // Notify only for bluetooth mode. For USB and WIFI onConnectionSuccessful is called
+            // right after socket creation
+            connectionStateCallback?.onConnectionSuccessful(connectionMode)
+        }
+    }
+
+    override fun onBytesReceived(buffer: ByteArray, bytes: Int) {}
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    override fun onDisconnected() {
+        disconnect()
+    }
+
     /**
      * Connect in WIFI mode.
      * Tcp socket is used only for connections, commands are sent using Udp
@@ -110,10 +125,14 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     fun disconnect() {
         CoroutineScope(Dispatchers.IO).launch {
-            tcpConn?.close()
+            streamingEnabled = false
             udpConn?.close()
+            tcpConn?.close()
+            btConn?.close()
+            connectionStateCallback?.onDisconnected()
         }
     }
 
@@ -125,25 +144,6 @@ class ConnectionManager private constructor() : Connection.Listener {
         when (withCoroutine) {
             false -> connection.send(event)
             true -> CoroutineScope(Dispatchers.IO).launch { connection.send(event) }
-        }
-    }
-
-    override fun onConnected(connectionMode: Connection.Mode) {
-        if(connectionMode == Connection.Mode.BLUETOOTH) {
-            // Notify only for bluetooth mode. For USB and WIFI onConnectionSuccessful is called
-            // right after socket creation
-            connectionStateCallback?.onConnectionSuccessful(connectionMode)
-        }
-    }
-
-    override fun onBytesReceived(buffer: ByteArray, bytes: Int) {}
-
-    override fun onDisconnected() {
-        CoroutineScope(Dispatchers.Main).launch {
-            streamingEnabled = false
-            udpConn?.close()
-            tcpConn?.close()
-            connectionStateCallback?.onDisconnected()
         }
     }
 }

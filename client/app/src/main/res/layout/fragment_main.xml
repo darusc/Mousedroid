@@ -37,6 +37,50 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConnectBT"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/textView2"
+            android:layout_alignEnd="@id/textView2"
+            android:layout_centerHorizontal="true"
+            android:backgroundTint="#000000"
+            android:padding="20dp"
+            android:text="Bluetooth"
+            android:textColor="#c9c9c9"
+            android:textSize="18sp"
+            app:cornerRadius="10dp"
+            app:icon="@drawable/baseline_bluetooth_24"
+            app:iconGravity="textStart"
+            app:iconSize="26sp"
+            app:iconTint="#ffffff"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnPairBT"
+            app:layout_constraintHorizontal_bias="0.891"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            app:layout_constraintVertical_bias="0.363"
+            app:layout_constraintWidth_percent="0.5" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPairBT"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginEnd="60dp"
+            android:layout_marginBottom="184dp"
+            android:backgroundTint="#000000"
+            android:padding="20dp"
+            android:text="Pair"
+            android:textColor="#c9c9c9"
+            android:textSize="18sp"
+            app:cornerRadius="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            app:layout_constraintVertical_bias="0.644"
+            app:layout_constraintWidth_percent="0.2" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConnectSV"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -46,7 +90,7 @@
             android:layout_centerHorizontal="true"
             android:backgroundTint="#000000"
             android:padding="20dp"
-            android:text="Connect Server"
+            android:text="Server (USB/WIFI)"
             android:textColor="#c9c9c9"
             android:textSize="18sp"
             app:cornerRadius="10dp"
@@ -56,35 +100,11 @@
             app:iconTint="#ffffff"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.512"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:layout_constraintVertical_bias="0.31"
-            app:layout_constraintWidth_percent="0.7" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConnectBT"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignStart="@id/textView2"
-            android:layout_alignEnd="@id/textView2"
-            android:layout_centerHorizontal="true"
-            android:backgroundTint="#000000"
-            android:padding="20dp"
-            android:text="Connect Bluetooth"
-            android:textColor="#c9c9c9"
-            android:textSize="18sp"
-            app:cornerRadius="10dp"
-            app:icon="@drawable/wifi"
-            app:iconGravity="textStart"
-            app:iconSize="26sp"
-            app:iconTint="#ffffff"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnConnectSV"
-            app:layout_constraintVertical_bias="0.076"
-            app:layout_constraintWidth_percent="0.7" />
+            app:layout_constraintTop_toBottomOf="@+id/btnConnectBT"
+            app:layout_constraintVertical_bias="0.046"
+            app:layout_constraintWidth_percent="0.72" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

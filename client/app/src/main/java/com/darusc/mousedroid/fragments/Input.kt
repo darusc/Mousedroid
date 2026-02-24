@@ -1,9 +1,11 @@
 package com.darusc.mousedroid.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -37,6 +39,7 @@ class Input: Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -56,7 +59,7 @@ class Input: Fragment() {
                 R.id.mode_keyboard -> { }
                 R.id.mode_disconnect -> {
                     item.isChecked = false
-                    //viewModel.disconnect()
+                    viewModel.disconnect()
                     findNavController().navigateUp()
                 }
                 else -> { }
@@ -87,5 +90,11 @@ class Input: Fragment() {
             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
             .replace(R.id.fragment_container, fragment)
             .commit()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.disconnect()
     }
 }

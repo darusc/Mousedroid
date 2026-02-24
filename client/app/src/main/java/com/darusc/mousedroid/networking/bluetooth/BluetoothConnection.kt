@@ -6,14 +6,11 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
 import android.bluetooth.BluetoothHidDeviceAppQosSettings
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings
-import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
 import com.darusc.mousedroid.layouts.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.Connection
@@ -32,10 +29,8 @@ class BluetoothConnection(
     private val listener: Listener
 ) : Connection() {
 
-    private val applicationContext = context.applicationContext
-
     private val bluetoothAdapter: BluetoothAdapter
-    private var bluetoothManager: BluetoothManager? = null
+    private val bluetoothAdapterWrapper = BluetoothAdapterWrapper.getInstance()!!
 
     private val layout = KeyboardLayoutUS()
 
@@ -70,11 +65,7 @@ class BluetoothConnection(
         override fun onConnectionStateChanged(device: BluetoothDevice?, state: Int) {
             super.onConnectionStateChanged(device, state)
 
-            bluetoothHostDevice = if (state == BluetoothProfile.STATE_CONNECTED) {
-                device
-            } else {
-                null
-            }
+            bluetoothHostDevice = if (state == BluetoothProfile.STATE_CONNECTED) device else null
 
             when (state) {
                 BluetoothProfile.STATE_CONNECTING -> Log.d("Mousedroid", "Connecting...")
@@ -96,10 +87,13 @@ class BluetoothConnection(
 
             if (registered) {
                 // The HID service is ready, make the phone visible.
-                Log.d("HID", "App registered successfully. Requesting discoverability...");
-                makeDeviceDiscoverable();
+                Log.d("Mousedroid", "App registered successfully. Requesting discoverability...")
+//                val target = findCompatibleHost()
+//                if (target != null) {
+//                    bluetoothHIDDevice?.connect(target)
+//                }
             } else {
-                Log.e("HID", "Failed to register app. Check permissions or device compatibility.");
+                Log.e("Mousedroid", "Failed to register app. Check permissions or device compatibility.")
             }
         }
     }
@@ -120,20 +114,7 @@ class BluetoothConnection(
     }
 
     init {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // BluetoothAdapter.getDefaultAdapter() is deprecated on version >= 31
-            bluetoothManager = applicationContext.getSystemService(BluetoothManager::class.java)
-            bluetoothAdapter = bluetoothManager!!.adapter
-        } else {
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        }
-
-        // On versions newer than 33 enabling bluetooth requires
-        // starting an intent
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
-            bluetoothAdapter.enable()
-        }
+        bluetoothAdapter = bluetoothAdapterWrapper.adapter
 
         bluetoothAdapter.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
@@ -155,21 +136,47 @@ class BluetoothConnection(
         }, BluetoothProfile.HID_DEVICE)
     }
 
-    private fun makeDeviceDiscoverable() {
-        val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-        // Make visible for 300 seconds (5 minutes)
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-        discoverableIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(applicationContext, discoverableIntent, null)
-    }
-
     override fun send(event: InputEvent) {
         val reports = event.toHIDReport(layout)
         reportChannel.trySend(reports)
     }
 
     override fun close() {
+        Log.d("Mousedroid", "Cleaning up Bluetooth connection...")
+
         sendReportJob.cancel()
         reportChannel.close()
+
+        bluetoothHostDevice?.let {
+            bluetoothHIDDevice?.disconnect(it)
+        }
+
+        bluetoothHIDDevice?.unregisterApp()
+        bluetoothAdapter.closeProfileProxy(BluetoothProfile.HID_DEVICE, bluetoothHIDDevice)
+
+        bluetoothHIDDevice = null
+        bluetoothHostDevice = null
     }
+
+//    private fun findCompatibleHost(): BluetoothDevice? {
+//        val pairedDevices = bluetoothAdapter.bondedDevices
+//        if (pairedDevices.isEmpty()) {
+//            return null
+//        }
+//
+//        val computer =
+//            pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.COMPUTER }
+//        if (computer != null) {
+//            return computer
+//        }
+//
+//        val tv = pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO }
+//        if (tv != null) {
+//            return tv
+//        }
+//
+//        return pairedDevices.firstOrNull {
+//            it.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.WEARABLE
+//        }
+//    }
 }
