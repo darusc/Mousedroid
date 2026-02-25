@@ -38,6 +38,9 @@ class BluetoothConnection(
     private val layout = KeyboardLayoutUS()
 
     private var isClosing = false
+    private var connectionEstablished = false
+    private var connectionAttempts = 0
+    private val MAX_CONNECTION_ATTEMPTS = 2
 
     /**
      * The device that sends the reports
@@ -74,19 +77,47 @@ class BluetoothConnection(
 
             when (state) {
                 BluetoothProfile.STATE_CONNECTING -> Log.d("Mousedroid", "Connecting...")
+
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("Mousedroid", "Connected!")
+                    connectionAttempts = 0
+                    connectionEstablished = true
                     listener.onConnected(Mode.BLUETOOTH)
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> Log.d("Mousedroid", "Disconnecting...")
+
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     bluetoothHostDevice = null
 
-                    // Only notify the listener if we aren't intentionally closing
-                    if (!isClosing) {
-                        Log.d("Mousedroid", "Link lost or target unreachable. Still registered and waiting.")
-                        //listener.onDisconnected()
+                    if (isClosing) {
+                        cleanupProxy()
+                    } else {
+                        if (connectionEstablished) {
+                            // Host turned off or went out of range after the connection
+                            // was established. Instant disconnect
+                            Log.d("Mousedroid", "Active session lost. Disconnecting instantly.")
+                            listener.onDisconnected()
+                            connectionEstablished = false
+                        } else if (connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
+                            // If connection was rejected instantly retry silently
+                            connectionAttempts++
+                            Log.d("Mousedroid", "Silent retry. Attempt: $connectionAttempts/2")
+
+                            // Try again silently without bothering the UI
+                            CoroutineScope(Dispatchers.Main).launch {
+                                delay(2000)
+                                if (!isClosing && bluetoothHostDevice == null) {
+                                    val target = findCompatibleHost()
+                                    target?.let { bluetoothHIDDevice?.connect(it) }
+                                }
+                            }
+                        } else {
+                            // Connection still failed after all retry attempts
+                            Log.d("Mousedroid", "Connection failed after 3 attempts")
+                            connectionAttempts = 0
+                            listener.onDisconnected()
+                        }
                     }
                 }
             }
@@ -113,7 +144,10 @@ class BluetoothConnection(
                     }
                 }
             } else {
-                Log.e("Mousedroid", "Failed to register app. Check permissions or device compatibility.")
+                Log.e(
+                    "Mousedroid",
+                    "Failed to register app. Check permissions or device compatibility."
+                )
             }
         }
     }
@@ -162,7 +196,7 @@ class BluetoothConnection(
     }
 
     override fun close() {
-        if(isClosing) {
+        if (isClosing) {
             return
         }
         isClosing = true
@@ -172,15 +206,14 @@ class BluetoothConnection(
         sendReportJob.cancel()
         reportChannel.close()
 
-        bluetoothHostDevice?.let {
-            bluetoothHIDDevice?.disconnect(it)
+        if (bluetoothHostDevice != null && bluetoothHIDDevice != null) {
+            val disconnected = bluetoothHIDDevice?.disconnect(bluetoothHostDevice)
+            if (disconnected == false) {
+                cleanupProxy()
+            }
+        } else {
+            cleanupProxy()
         }
-
-        bluetoothHIDDevice?.unregisterApp()
-        bluetoothAdapter.closeProfileProxy(BluetoothProfile.HID_DEVICE, bluetoothHIDDevice)
-
-        bluetoothHIDDevice = null
-        bluetoothHostDevice = null
     }
 
     /**
@@ -193,12 +226,14 @@ class BluetoothConnection(
             return null
         }
 
-        val computer = pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.COMPUTER }
+        val computer =
+            pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.COMPUTER }
         if (computer != null) {
             return computer
         }
 
-        val tv = pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO }
+        val tv =
+            pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO }
         if (tv != null) {
             return tv
         }
@@ -206,5 +241,14 @@ class BluetoothConnection(
         return pairedDevices.firstOrNull {
             it.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.WEARABLE
         }
+    }
+
+    /**
+     * Unregisters the HID app and closes the HID_DEVICE profile proxy
+     */
+    private fun cleanupProxy() {
+        bluetoothHIDDevice?.unregisterApp()
+        bluetoothAdapter.closeProfileProxy(BluetoothProfile.HID_DEVICE, bluetoothHIDDevice)
+        bluetoothHIDDevice = null
     }
 }

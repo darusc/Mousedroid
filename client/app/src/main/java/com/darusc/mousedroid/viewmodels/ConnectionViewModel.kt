@@ -56,7 +56,10 @@ class ConnectionViewModel :
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onDisconnected() {
-        disconnect()
+        // Hardware link was lost (e.g host device's bluetooth was turned off)
+        setState(State.Idle)
+        sendEvent(Event.ConnectionDisconnected)
+        sendEvent(Event.NavigateToMain)
     }
 
     /**
@@ -94,12 +97,14 @@ class ConnectionViewModel :
         }
     }
 
+    /**
+     * Should be called only when the user requests a manual disconnect
+     */
     @RequiresApi(Build.VERSION_CODES.P)
     fun disconnect() {
         viewModelScope.launch {
             connectionManager.disconnect()
             setState(State.Idle)
-            sendEvent(Event.ConnectionDisconnected)
             sendEvent(Event.NavigateToMain)
         }
     }

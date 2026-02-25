@@ -51,8 +51,8 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
     /**
      * Active connection. UDP is prioritized over TCP
      */
-    private val connection
-        get() = (udpConn ?: tcpConn ?: btConn) as Connection
+    private val connection: Connection?
+        get() = udpConn ?: tcpConn ?: btConn
 
     private var connected = false
 
@@ -72,7 +72,7 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
             // Notify only for bluetooth mode. For USB and WIFI onConnectionSuccessful is called
             // right after socket creation
             connectionStateCallback?.onConnectionSuccessful(connectionMode)
-            connected = false
+            connected = true
         }
     }
 
@@ -81,11 +81,12 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onDisconnected() {
         disconnect()
+        connectionStateCallback?.onDisconnected()
     }
 
     override fun onBatteryPercentChanged(percentage: Int) {
         if (connected) {
-            connection.send(InputEvent.BatteryEvent(percentage))
+            connection?.send(InputEvent.BatteryEvent(percentage))
         }
     }
 
@@ -139,6 +140,9 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
         }
     }
 
+    /**
+     * Close active connection
+     */
     @RequiresApi(Build.VERSION_CODES.P)
     fun disconnect() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -146,7 +150,10 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
             udpConn?.close()
             tcpConn?.close()
             btConn?.close()
-            connectionStateCallback?.onDisconnected()
+
+            udpConn = null
+            tcpConn = null
+            btConn = null
         }
     }
 
@@ -156,8 +163,8 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
         }
 
         when (withCoroutine) {
-            false -> connection.send(event)
-            true -> CoroutineScope(Dispatchers.IO).launch { connection.send(event) }
+            false -> connection?.send(event)
+            true -> CoroutineScope(Dispatchers.IO).launch { connection?.send(event) }
         }
     }
 }
