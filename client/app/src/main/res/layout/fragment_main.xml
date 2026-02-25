@@ -55,10 +55,10 @@
             app:iconTint="#ffffff"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btnPairBT"
-            app:layout_constraintHorizontal_bias="0.891"
+            app:layout_constraintHorizontal_bias="0.862"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:layout_constraintVertical_bias="0.363"
+            app:layout_constraintVertical_bias="0.368"
             app:layout_constraintWidth_percent="0.5" />
 
         <com.google.android.material.button.MaterialButton
@@ -66,18 +66,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginEnd="60dp"
-            android:layout_marginBottom="184dp"
+            android:layout_marginEnd="56dp"
             android:backgroundTint="#000000"
             android:padding="20dp"
             android:text="Pair"
             android:textColor="#c9c9c9"
             android:textSize="18sp"
             app:cornerRadius="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/btnConnectSV"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:layout_constraintVertical_bias="0.644"
+            app:layout_constraintVertical_bias="0.94"
             app:layout_constraintWidth_percent="0.2" />
 
         <com.google.android.material.button.MaterialButton

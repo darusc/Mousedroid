@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -37,13 +36,6 @@ class Main : Fragment() {
     private lateinit var loadingPopup: PopupWindow
 
     private val viewModel: ConnectionViewModel by activityViewModels()
-
-    @SuppressLint("MissingPermission")
-    @RequiresApi(Build.VERSION_CODES.P)
-    private val settingsLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            viewModel.startBluetoothMode(requireContext())
-        }
 
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.P)
@@ -86,8 +78,11 @@ class Main : Fragment() {
         }
 
         binding.btnPairBT.setOnClickListener {
-            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-            settingsLauncher.launch(intent)
+            viewModel.startBluetoothMode(requireContext())
+            val intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 120)
+            }
+            startActivity(intent)
         }
 
 

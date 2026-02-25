@@ -1,6 +1,7 @@
 package com.darusc.mousedroid.networking.bluetooth
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
 
@@ -35,8 +36,8 @@ class BluetoothAdapterWrapper private constructor(context: Context) {
     init {
         _adapter = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // BluetoothAdapter.getDefaultAdapter() is deprecated on version >= 31
-            val bluetoothAdapterWrapper = context.getSystemService(BluetoothAdapterWrapper::class.java)
-            bluetoothAdapterWrapper!!.adapter
+            val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
+            bluetoothManager!!.adapter
         } else {
             BluetoothAdapter.getDefaultAdapter()
         }
