@@ -128,14 +128,22 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
     }
 
     /**
-     * Connect in bluetooth mode
+     * Register the bluetooth HID profile
      */
     @RequiresApi(Build.VERSION_CODES.P)
-    fun connectBluetooth(context: Context) {
-        connectionStateCallback?.onConnectionInitiated(Connection.Mode.BLUETOOTH)
+    fun registerBluetoothHID(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             btConn = BluetoothConnection(context, this@ConnectionManager)
         }
+    }
+
+    /**
+     * Connect in bluetooth mode
+     */
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun connectBluetooth(macAddress: String) {
+        connectionStateCallback?.onConnectionInitiated(Connection.Mode.BLUETOOTH)
+        btConn?.connect(macAddress)
     }
 
     /**

@@ -7,7 +7,6 @@ import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.viewModelScope
-import com.darusc.mousedroid.R
 import com.darusc.mousedroid.getDeviceDetails
 import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.networking.ConnectionManager
@@ -30,7 +29,7 @@ class ConnectionViewModel :
         data class Navigate(@IdRes val id: Int) : Event()
         object NavigateToInput : Event()
         object NavigateToMain : Event()
-        object NavigateToDeviceList : Event()
+        data class NavigateToDeviceList(val mode: Connection.Mode) : Event()
 
         object EnableBluetooth : Event()
 
@@ -77,22 +76,20 @@ class ConnectionViewModel :
         } else if (hasWifiConnection(context)) {
             // Otherwise if it has an active wifi connection, go to the
             // device list fragment to allow the user to choose the device to connect to
-            sendEvent(Event.Navigate(R.id.action_main_to_devicelist))
+            sendEvent(Event.NavigateToDeviceList(Connection.Mode.WIFI))
         }
     }
 
     /**
-     *  Start server mode over WIFI
+     * Start bluetooth mode. Either starts a bluetooth enable intent
+     * or redirects to the bluetooth device list
      */
-    fun startServerMode(address: String, port: Int, deviceDetails: String) {
-        connectionManager.connectWIFI(address, port, deviceDetails)
-    }
-
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     @RequiresApi(Build.VERSION_CODES.P)
     fun startBluetoothMode(context: Context, afterEnableIntent: Boolean = false) {
         if (afterEnableIntent || BluetoothAdapterWrapper.getInstance()?.isEnabled!!) {
-            connectionManager.connectBluetooth(context)
+            connectionManager.registerBluetoothHID(context)
+            sendEvent(Event.NavigateToDeviceList(Connection.Mode.BLUETOOTH))
         } else {
             // Notify the fragment to start the bluetooth enable intent
             sendEvent(Event.EnableBluetooth)

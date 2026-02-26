@@ -15,7 +15,7 @@ class DeviceAdapter(
 ) : RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
 
     interface OnItemClickListener {
-        fun onItemClick(address: String)
+        fun onItemClick(name: String, address: String)
         fun onItemLongClick(position: Int)
     }
 
@@ -39,7 +39,7 @@ class DeviceAdapter(
         vh.deviceAddress.text = address
 
         vh.wrapper.setOnClickListener {
-            listener.onItemClick(address)
+            listener.onItemClick(name, address)
         }
 
         vh.wrapper.setOnLongClickListener {

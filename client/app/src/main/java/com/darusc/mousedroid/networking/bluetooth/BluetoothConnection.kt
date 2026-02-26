@@ -2,19 +2,15 @@ package com.darusc.mousedroid.networking.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
 import android.bluetooth.BluetoothHidDeviceAppQosSettings
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
-import com.darusc.mousedroid.BatteryMonitor
 import com.darusc.mousedroid.layouts.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.Connection
@@ -33,15 +29,13 @@ class BluetoothConnection(
     private val listener: Listener
 ) : Connection() {
 
-    private val bluetoothAdapter: BluetoothAdapter
-    private val bluetoothAdapterWrapper = BluetoothAdapterWrapper.getInstance()!!
-
-    private val layout = KeyboardLayoutUS()
-
     private var isClosing = false
     private var connectionEstablished = false
-    private var connectionAttempts = 0
-    private val MAX_CONNECTION_ATTEMPTS = 2
+
+    private val bluetoothAdapterWrapper = BluetoothAdapterWrapper.getInstance()!!
+    private val bluetoothAdapter: BluetoothAdapter = bluetoothAdapterWrapper.adapter
+
+    private val layout = KeyboardLayoutUS()
 
     /**
      * The device that sends the reports
@@ -82,25 +76,21 @@ class BluetoothConnection(
 
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("Mousedroid", "Connected!")
-                    connectionAttempts = 0
-                    connectionEstablished = true
                     listener.onConnected(Mode.BLUETOOTH, bluetoothHostDevice?.name ?: "Unknown device")
 
                     // Send a battery report after connecting
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(3000)
-                        if (bluetoothHostDevice != null) {
-                            val level = BatteryMonitor.getBatteryLevel(context)
-                            send(InputEvent.BatteryEvent(level))
-                        }
-                    }
+//                    CoroutineScope(Dispatchers.IO).launch {
+//                        delay(3000)
+//                        if (bluetoothHostDevice != null) {
+//                            val level = BatteryMonitor.getBatteryLevel(context)
+//                            send(InputEvent.BatteryEvent(level))
+//                        }
+//                    }
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> Log.d("Mousedroid", "Disconnecting...")
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    bluetoothHostDevice = null
-
                     if (isClosing) {
                         cleanupProxy()
                     } else {
@@ -110,23 +100,9 @@ class BluetoothConnection(
                             Log.d("Mousedroid", "Active session lost. Disconnecting instantly.")
                             listener.onDisconnected(Mode.BLUETOOTH, hostname)
                             connectionEstablished = false
-                        } else if (connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
-                            // If connection was rejected instantly retry silently
-                            connectionAttempts++
-                            Log.d("Mousedroid", "Silent retry. Attempt: $connectionAttempts/2")
-
-                            // Try again silently without bothering the UI
-                            CoroutineScope(Dispatchers.Main).launch {
-                                delay(2000)
-                                if (!isClosing && bluetoothHostDevice == null) {
-                                    val target = findCompatibleHost()
-                                    target?.let { bluetoothHIDDevice?.connect(it) }
-                                }
-                            }
                         } else {
-                            // Connection still failed after all retry attempts
-                            Log.d("Mousedroid", "Connection failed after 3 attempts")
-                            connectionAttempts = 0
+                            // Connection failed
+                            Log.d("Mousedroid", "Connection to $hostname failed")
                             listener.onConnectionFailed(Mode.BLUETOOTH)
                         }
                     }
@@ -140,25 +116,8 @@ class BluetoothConnection(
             if (registered) {
                 // HID service ready
                 Log.d("Mousedroid", "App registered successfully.")
-                // Try to auto connect to a compatible host
-                CoroutineScope(Dispatchers.Main).launch {
-                    // Delay to allow the bluetooth stack to be ready for connecting,
-                    // otherwise connection fails immediately
-                    delay(2000)
-                    val target = findCompatibleHost()
-                    if (target != null && bluetoothHostDevice == null) {
-                        Log.d("Mousedroid", "Paging target: ${target.name}")
-                        val success = bluetoothHIDDevice?.connect(target)
-                        if (success == false) {
-                            Log.e("Mousedroid", "Paging failed. Device might be unreachable.")
-                        }
-                    }
-                }
             } else {
-                Log.e(
-                    "Mousedroid",
-                    "Failed to register app. Check permissions or device compatibility."
-                )
+                Log.e("Mousedroid", "Failed to register app. Check permissions or device compatibility.")
             }
         }
     }
@@ -179,8 +138,6 @@ class BluetoothConnection(
     }
 
     init {
-        bluetoothAdapter = bluetoothAdapterWrapper.adapter
-
         bluetoothAdapter.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.HID_DEVICE) {
@@ -228,29 +185,22 @@ class BluetoothConnection(
     }
 
     /**
-     * Return a compatible host from the already paired devices
-     * Prioritizes devices with class COMPUTER
+     * Connect to a bluetooth device
      */
-    private fun findCompatibleHost(): BluetoothDevice? {
-        val pairedDevices = bluetoothAdapter.bondedDevices
-        if (pairedDevices.isEmpty()) {
-            return null
-        }
-
-        val computer =
-            pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.COMPUTER }
-        if (computer != null) {
-            return computer
-        }
-
-        val tv =
-            pairedDevices.firstOrNull { it.bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO }
-        if (tv != null) {
-            return tv
-        }
-
-        return pairedDevices.firstOrNull {
-            it.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.WEARABLE
+    fun connect(hostMacAddress: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            // Delay to allow the bluetooth stack to be ready for connecting,
+            // otherwise connection fails immediately
+            delay(2000)
+            if(!isClosing && bluetoothHostDevice == null) {
+                val target = bluetoothAdapter.bondedDevices.firstOrNull { it.address == hostMacAddress }
+                if (target != null) {
+                    bluetoothHIDDevice?.connect(target)
+                } else {
+                    Log.d("Mousedroid", "Target device not found")
+                    listener.onConnectionFailed(Mode.BLUETOOTH)
+                }
+            }
         }
     }
 

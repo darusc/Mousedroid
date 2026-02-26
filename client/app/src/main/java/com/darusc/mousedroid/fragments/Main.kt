@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -94,8 +95,7 @@ class Main : Fragment() {
                         when (it) {
                             is ConnectionViewModel.State.Connecting -> {
                                 if (!loadingPopup.isShowing) {
-                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text =
-                                        it.message
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
                                     loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
                                 }
                             }
@@ -112,10 +112,13 @@ class Main : Fragment() {
                             is ConnectionViewModel.Event.NavigateToInput -> {
                                 findNavController().navigate(R.id.action_main_to_touchpad)
                             }
+
                             is ConnectionViewModel.Event.NavigateToDeviceList -> {
-                                findNavController().navigate(R.id.action_main_to_devicelist)
+                                findNavController().navigate(R.id.action_main_to_devicelist, bundleOf("CONNECTION_MODE" to it.mode))
                             }
+
                             is ConnectionViewModel.Event.NavigateToMain -> {}
+
                             is ConnectionViewModel.Event.ConnectionDisconnected -> {
                                 val pview = showPopupDialog(R.layout.connection_disconnected_fragment)
                                 pview?.apply {
@@ -128,6 +131,7 @@ class Main : Fragment() {
                                     }
                                 }
                             }
+
                             is ConnectionViewModel.Event.ConnectionFailed -> {
                                 val pview = showPopupDialog(R.layout.connection_failed_fragment)
                                 pview?.apply {
@@ -140,6 +144,7 @@ class Main : Fragment() {
                                     }
                                 }
                             }
+
                             is ConnectionViewModel.Event.EnableBluetooth -> {
                                 val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                                 enableBluetoothLauncher.launch(intent)

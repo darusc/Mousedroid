@@ -44,7 +44,7 @@ class KeyboardReport(
 class MediaReport(
     bitmask: Short
 ): HIDReport(
-    byteArrayOf((bitmask and 0xFF).toByte(), ((bitmask.toInt() shr 8) and 0xFF).toByte()),
+    byteArrayOf((bitmask and 0xFF).toByte()),
     REPORT_ID_MEDIA
 )
 

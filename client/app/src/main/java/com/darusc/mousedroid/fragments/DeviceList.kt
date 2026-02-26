@@ -1,7 +1,10 @@
 package com.darusc.mousedroid.fragments
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothClass.Device
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -10,6 +13,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
@@ -28,6 +32,7 @@ import com.darusc.mousedroid.getDeviceDetails
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.darusc.mousedroid.networking.Connection
+import com.darusc.mousedroid.networking.bluetooth.BluetoothAdapterWrapper
 import com.darusc.mousedroid.viewmodels.ConnectionViewModel
 import com.darusc.mousedroid.viewmodels.DeviceListViewModel
 import kotlinx.coroutines.launch
@@ -39,11 +44,18 @@ class DeviceList : Fragment() {
 
     private lateinit var deviceAdapter: DeviceAdapter
 
+    private val connectionMode: Connection.Mode
+        get() = arguments?.getSerializable("CONNECTION_MODE") as Connection.Mode
+
     private val connectionViewModel: ConnectionViewModel by activityViewModels()
-    private val deviceListViewModel: DeviceListViewModel by activityViewModels() {
-        DeviceListViewModel.Factory(
-            requireActivity().getSharedPreferences("devices", Context.MODE_PRIVATE)
-        )
+    private val deviceListViewModel: DeviceListViewModel by activityViewModels {
+        if(connectionMode == Connection.Mode.BLUETOOTH) {
+            val devices = BluetoothAdapterWrapper.getInstance()?.pairedDevices ?: emptySet()
+            DeviceListViewModel.Factory(devices)
+        } else {
+            val preferences = requireActivity().getSharedPreferences("devices", Context.MODE_PRIVATE)
+            DeviceListViewModel.Factory(preferences)
+        }
     }
 
     override fun onCreateView(
@@ -70,20 +82,29 @@ class DeviceList : Fragment() {
 
         deviceAdapter = DeviceAdapter(arrayListOf(), object : DeviceAdapter.OnItemClickListener {
             override fun onItemLongClick(position: Int) {
-                val name = deviceAdapter.devices[position].first
-                showDeleteDialog(name)
+                if (connectionMode == Connection.Mode.WIFI) {
+                    // Delete is done only when the fragment was created to display wifi devices
+                    val name = deviceAdapter.devices[position].first
+                    showDeleteDialog(name)
+                }
             }
 
+            @RequiresApi(Build.VERSION_CODES.P)
             @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-            override fun onItemClick(address: String) {
-                val details = getDeviceDetails(requireContext(), Connection.Mode.WIFI)
-                connectionViewModel.startServerMode(address, 6969, details)
+            override fun onItemClick(name: String, address: String) {
+                deviceListViewModel.onDeviceClick(requireContext(), name, address)
             }
         })
         binding.recyclerView.adapter = deviceAdapter
 
-        view.findViewById<MaterialButton>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
-        view.findViewById<MaterialButton>(R.id.btnAddDevice).setOnClickListener { showAddDeviceDialog() }
+        binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+
+        // Make the add device button visible only if fragment
+        // was created to display wifi devices otherwise keep it hidden
+        if(connectionMode == Connection.Mode.WIFI) {
+            binding.btnAddDevice.setOnClickListener { showAddDeviceDialog() }
+            binding.btnAddDevice.visibility = View.VISIBLE
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

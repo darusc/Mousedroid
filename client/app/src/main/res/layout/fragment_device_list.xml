@@ -36,6 +36,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddDevice"
+            android:visibility="gone"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:background="@drawable/add_icon"
