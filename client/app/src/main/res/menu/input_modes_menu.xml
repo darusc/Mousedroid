@@ -17,7 +17,14 @@
         </menu>
     </item>
 
-    <item android:title="Session">
+    <group android:id="@+id/group_settings" android:checkableBehavior="none">
+        <item
+            android:id="@+id/mode_change_layout"
+            android:icon="@android:drawable/ic_menu_sort_alphabetically"
+            android:title="Layout: US English" />
+    </group>
+
+    <item android:title="Session">1
         <menu>
             <item
                 android:id="@+id/mode_disconnect"

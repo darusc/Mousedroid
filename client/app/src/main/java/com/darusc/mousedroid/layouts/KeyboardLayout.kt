@@ -6,6 +6,7 @@ package com.darusc.mousedroid.layouts
  * (packed as an Int. First byte -> the modifier, second byte -> the keycode)
  */
 abstract class KeyboardLayout(
+    val name: String,
     private val asciimap: IntArray
 ) {
 

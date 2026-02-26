@@ -1,23 +1,19 @@
 package com.darusc.mousedroid.viewmodels
 
-import android.content.Context
 import android.view.View
 import com.darusc.mousedroid.R
-import com.darusc.mousedroid.mkinput.GestureHandler
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.ConnectionManager
 
-class TouchpadViewModel: BaseViewModel<TouchpadViewModel.State, TouchpadViewModel.Event>(State.Idle) {
+class TouchpadViewModel: BaseViewModel<TouchpadViewModel.State, TouchpadViewModel.Event>(State()) {
 
-    sealed class State: BaseViewModel.State() {
-        object Idle: State()
-    }
+    class State: BaseViewModel.State()
     sealed class Event: BaseViewModel.Event()
 
     private val connectionManager = ConnectionManager.getInstance()
 
-    fun createGestureHandler(context: Context): GestureHandler {
-        return GestureHandler(context)
+    fun sendMouseEvent(event: InputEvent) {
+        connectionManager.send(event)
     }
 
     fun onMediaButtonClick(view: View) {

@@ -1,13 +1,19 @@
 package com.darusc.mousedroid.fragments
 
+import android.content.Context
+import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,8 +23,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.databinding.FragmentInputBinding
+import com.darusc.mousedroid.mkinput.KeyboardInputWatcher
 import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.viewmodels.ConnectionViewModel
+import com.darusc.mousedroid.viewmodels.KeyboardViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 /**
@@ -29,7 +38,8 @@ class Input: Fragment() {
 
     private lateinit var binding: FragmentInputBinding
 
-    private val viewModel: ConnectionViewModel by activityViewModels()
+    private val connectionViewModel: ConnectionViewModel by activityViewModels()
+    private val keyboardViewModel: KeyboardViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,22 +59,54 @@ class Input: Fragment() {
             replaceChildFragment(Touchpad())
         }
 
+        binding.hiddenInput.apply {
+            addTextChangedListener(KeyboardInputWatcher(this) { bytes ->
+                keyboardViewModel.handleKeypress(bytes)
+            })
+            // Don't close the keyboard when pressing enter
+            setOnEditorActionListener { _, _, _ -> true }
+        }
+
+        // Remove the focus from the hidden text input and clear its text
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            if(!isKeyboardVisible && binding.hiddenInput.hasFocus()) {
+                binding.hiddenInput.clearFocus()
+                binding.hiddenInput.text.clear()
+            }
+            insets
+        }
+
+        // Set navigation listener for the side drawer
         binding.btnOpenDrawer.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-
         binding.navigation.setNavigationItemSelectedListener { item ->
-            item.isChecked = true
             when(item.itemId) {
-                R.id.mode_touchpad -> replaceChildFragment(Touchpad())
-                R.id.mode_numpad -> replaceChildFragment(Numpad())
-                R.id.mode_keyboard -> { }
+                R.id.mode_touchpad -> {
+                    item.isChecked = true
+                    closeSoftKeyboard()
+                    replaceChildFragment(Touchpad())
+                }
+                R.id.mode_numpad -> {
+                    item.isChecked = true
+                    closeSoftKeyboard()
+                    replaceChildFragment(Numpad())
+                }
+                R.id.mode_keyboard -> {
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    openSoftKeyboard()
+                    return@setNavigationItemSelectedListener true
+                }
                 R.id.mode_disconnect -> {
-                    item.isChecked = false
-                    viewModel.disconnect()
+                    closeSoftKeyboard()
+                    connectionViewModel.disconnect()
                     findNavController().navigateUp()
                 }
-                else -> { }
+                R.id.mode_change_layout -> {
+                    showLayoutSelectorDialog(item)
+                    return@setNavigationItemSelectedListener true
+                }
             }
             binding.drawerLayout.closeDrawer(GravityCompat.START)
             true
@@ -73,7 +115,7 @@ class Input: Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.events.collect {
+                    connectionViewModel.events.collect {
                         when(it) {
                             is ConnectionViewModel.Event.NavigateToInput -> { }
                             is ConnectionViewModel.Event.NavigateToMain -> findNavController().popBackStack(R.id.mainFragment, false)
@@ -116,9 +158,50 @@ class Input: Fragment() {
             .commit()
     }
 
+    private fun showLayoutSelectorDialog(menuItem: MenuItem) {
+        val layouts = keyboardViewModel.layouts.toTypedArray()
+
+        val currentLayoutIndex = layouts.indexOf(keyboardViewModel.activeKeyboardLayout.name)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Select Keyboard Layout")
+            .setSingleChoiceItems(layouts, currentLayoutIndex) { dialog, which ->
+
+                val selectedLayoutName = layouts[which]
+                if (keyboardViewModel.setKeyboardLayout(selectedLayoutName)) {
+                    menuItem.title = "Layout: $selectedLayoutName"
+                } else {
+                    menuItem.title = "Layout"
+                }
+
+
+                dialog.dismiss()
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun openSoftKeyboard() {
+        //binding.hiddenInput.isFocusable = true
+        //binding.hiddenInput.isFocusableInTouchMode = true
+        binding.hiddenInput.requestFocus()
+
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(binding.hiddenInput, InputMethodManager.SHOW_FORCED)
+    }
+
+    private fun closeSoftKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
+        view?.clearFocus()
+    }
+
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.disconnect()
+        connectionViewModel.disconnect()
     }
 }

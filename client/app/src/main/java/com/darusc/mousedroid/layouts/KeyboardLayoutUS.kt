@@ -1,6 +1,7 @@
 package com.darusc.mousedroid.layouts
 
 class KeyboardLayoutUS: KeyboardLayout(
+    NAME,
     intArrayOf(
         // --- Control Codes (0-31) ---
         Keycode.KEY_RESERVED,    // 00 NUL
@@ -277,4 +278,8 @@ class KeyboardLayoutUS: KeyboardLayout(
         Keycode.KEY_RESERVED,                       // 254 - Thorn
         Keycode.KEY_RESERVED,                       // 255 - 'y' Umlaut
     )
-)
+) {
+    companion object {
+        const val NAME = "English (US)"
+    }
+}

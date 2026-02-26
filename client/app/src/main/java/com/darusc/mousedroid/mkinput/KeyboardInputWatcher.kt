@@ -3,13 +3,13 @@ package com.darusc.mousedroid.mkinput
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.darusc.mousedroid.networking.ConnectionManager
 
-class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
+class KeyboardInputWatcher(
+    private val editText: EditText,
+    private val sendInputCallback: (ByteArray) -> Unit
+): TextWatcher {
 
     private val TAG = "Mousedroid"
-
-    private val connectionManager = ConnectionManager.getInstance()
 
     private var ignoreChange = false
 
@@ -22,7 +22,7 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
     override fun onTextChanged(text: CharSequence, start: Int, lengthBefore: Int, lengthAfter: Int) {
         if(!ignoreChange) {
             if(lengthAfter < lengthBefore){
-                connectionManager.send(InputEvent.KeyPress(byteArrayOf(127)), true) // DEL
+                sendInputCallback(byteArrayOf(127)) // DEL
                 if(start == 1 && lengthAfter == 0){
                     reset()
                 }
@@ -30,17 +30,17 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
             else {
                 val c = if(text.isNotEmpty()) text[text.length - 1] else null
                 if(c == '\n'){
-                    connectionManager.send(InputEvent.KeyPress(byteArrayOf(10)), true) // \n
+                    sendInputCallback(byteArrayOf(10)) // \n
                     reset()
                 }
                 else {
                     if(lengthAfter == lengthBefore + 1) {
-                        connectionManager.send(InputEvent.KeyPress(byteArrayOf(text.last().code.toByte())), true)
+                        sendInputCallback(byteArrayOf(text.last().code.toByte()))
                     }
                     else {
                         val newText = text.substring(start, start + (lengthAfter - lengthBefore))
                         val bytes = newText.toByteArray(Charsets.UTF_8)
-                        connectionManager.send(InputEvent.KeyPress(bytes), true)
+                        sendInputCallback(bytes)
                     }
                 }
             }

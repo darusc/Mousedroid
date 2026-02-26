@@ -1,7 +1,6 @@
 package com.darusc.mousedroid.fragments
 
 import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -11,7 +10,6 @@ import com.darusc.mousedroid.mkinput.GestureHandler
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.databinding.FragmentTouchpadBinding
 import androidx.core.view.isGone
-import androidx.core.view.setPadding
 import androidx.fragment.app.activityViewModels
 import androidx.transition.TransitionManager
 import com.darusc.mousedroid.viewmodels.TouchpadViewModel
@@ -41,7 +39,10 @@ class Touchpad : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Setup touchpad gesture listener and button listeners
-        binding.touchpadSensor.setOnTouchListener(viewModel.createGestureHandler(requireContext()))
+        val gestureHandler = GestureHandler(requireContext()) { event ->
+            viewModel.sendMouseEvent(event)
+        }
+        binding.touchpadSensor.setOnTouchListener(gestureHandler)
 
         // Multimedia dropdown
         binding.btnToggleMedia.setOnClickListener {

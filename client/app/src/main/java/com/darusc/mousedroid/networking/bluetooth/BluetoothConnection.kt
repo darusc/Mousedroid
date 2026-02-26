@@ -35,8 +35,6 @@ class BluetoothConnection(
     private val bluetoothAdapterWrapper = BluetoothAdapterWrapper.getInstance()!!
     private val bluetoothAdapter: BluetoothAdapter = bluetoothAdapterWrapper.adapter
 
-    private val layout = KeyboardLayoutUS()
-
     /**
      * The device that sends the reports
      */
@@ -159,7 +157,7 @@ class BluetoothConnection(
     }
 
     override fun send(event: InputEvent) {
-        val reports = event.toHIDReport(layout)
+        val reports = event.toHIDReport()
         reportChannel.trySend(reports)
     }
 

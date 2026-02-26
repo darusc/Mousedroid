@@ -86,7 +86,7 @@ private fun getNumpadKeyHIDUsageID(numpadKey: InputEvent.NumpadKey): Byte {
  * Translate the input event to 1 or more bluetooth HID reports
  * (e.g mouse click requires 2 reports -> one for pressing the button and one for releasing)
  */
-fun InputEvent.toHIDReport(layout: KeyboardLayout): Array<HIDReport> {
+fun InputEvent.toHIDReport(): Array<HIDReport> {
     Log.d("Mousedroid", this::class.java.toString())
     return when (this) {
         is InputEvent.MouseMove -> {
@@ -129,18 +129,10 @@ fun InputEvent.toHIDReport(layout: KeyboardLayout): Array<HIDReport> {
         }
 
         is InputEvent.KeyPress -> {
-            val reports = arrayListOf<HIDReport>()
-            // Extract all characters from the typed string
-            // and map them using the the selected layout
-            val text = String(this.activeBytes, Charsets.UTF_8)
-            for (char in text) {
-                val mapping = layout.getMapping(char)
-                if (mapping != null) {
-                    reports.add(KeyboardReport(mapping.modifier, mapping.code)) // KEY pressed
-                    reports.add(KeyboardReport(0, 0))           // KEY released
-                }
-            }
-            reports.toTypedArray()
+            arrayOf(
+                KeyboardReport(this.modifier, this.code),
+                KeyboardReport(0, 0)
+            )
         }
 
         is InputEvent.Zoom -> {
@@ -209,7 +201,9 @@ fun InputEvent.toSocketReport(): ByteArray {
         }
 
         is InputEvent.KeyPress -> {
-            byteArrayOf(RawSocketEvents.KEYPRESS) + this.activeBytes
+            // TO DO - update server to work with the new keyboard layout system
+            //byteArrayOf(RawSocketEvents.KEYPRESS) + this.activeBytes
+            byteArrayOf()
         }
 
         else -> byteArrayOf()

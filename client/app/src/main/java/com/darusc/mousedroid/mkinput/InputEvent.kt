@@ -46,7 +46,7 @@ sealed class InputEvent {
     data class MouseDragState(val button: MouseButton, val isDown: Boolean) : InputEvent() // For DOWN/UP dragging
     data class Zoom(val scale: Int) : InputEvent()
 
-    data class KeyPress(val activeBytes: ByteArray) : InputEvent()
+    data class KeyPress(val modifier: Byte, val code: Byte) : InputEvent()
     data class NumpadKeyPress(val key: NumpadKey): InputEvent()
 
     data class MediaEvent(val action: MediaAction): InputEvent()
