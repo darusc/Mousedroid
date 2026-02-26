@@ -78,6 +78,7 @@ class Input: Fragment() {
         }
 
         // Set navigation listener for the side drawer
+        binding.navigation.setCheckedItem(R.id.mode_touchpad)
         binding.btnOpenDrawer.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
@@ -114,6 +115,20 @@ class Input: Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    connectionViewModel.state.collect {
+                        when (it) {
+                            is ConnectionViewModel.State.Connected -> {
+                                binding.navigation
+                                    .getHeaderView(0)
+                                    .findViewById<TextView>(R.id.connectionStatus)
+                                    .text = "Connected to ${it.hostName}"
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+
                 launch {
                     connectionViewModel.events.collect {
                         when(it) {

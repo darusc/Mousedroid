@@ -6,29 +6,33 @@
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/mode_touchpad"
-                    android:title="Touchpad" />
+                    android:icon="@drawable/ic_touchpad"
+                    android:title="Touchpad"
+                    android:checked="true"/>
                 <item
                     android:id="@+id/mode_numpad"
+                    android:icon="@drawable/ic_baseline_dialpad_24"
                     android:title="Numpad" />
                 <item
                     android:id="@+id/mode_keyboard"
+                    android:icon="@drawable/ic_baseline_keyboard_24"
                     android:title="Keyboard" />
+                <item
+                    android:id="@+id/mode_change_layout"
+                    android:icon="@drawable/ic_language"
+                    android:title="Layout: US English"
+                    android:checkable="false"/>
             </group>
         </menu>
     </item>
-
-    <group android:id="@+id/group_settings" android:checkableBehavior="none">
-        <item
-            android:id="@+id/mode_change_layout"
-            android:icon="@android:drawable/ic_menu_sort_alphabetically"
-            android:title="Layout: US English" />
-    </group>
 
     <item android:title="Session">1
         <menu>
             <item
                 android:id="@+id/mode_disconnect"
-                android:title="Disconnect" />
+                android:title="Disconnect"
+                android:icon="@drawable/ic_disconnect"
+                android:iconTint="@color/design_default_color_error"/>
         </menu>
     </item>
 </menu>
