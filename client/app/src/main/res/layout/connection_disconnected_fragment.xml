@@ -10,7 +10,7 @@
     android:paddingHorizontal="20dp">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -23,23 +23,23 @@
         android:fontFamily="sans-serif-light"/>
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Connection to Mousedroid was interrupted."
+        tools:text="Connection to Mousedroid was interrupted."
         android:gravity="center"
         android:textColor="@color/md_theme_dark_error"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/title" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Check the server, adb or WIFI connection and make sure everything is on then reconnect."
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        tools:text="Check the server, adb or WIFI connection and make sure everything is on then reconnect."
+        app:layout_constraintTop_toBottomOf="@+id/subtitle" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnOK"
@@ -55,7 +55,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
+        app:layout_constraintTop_toBottomOf="@+id/description"
         app:layout_constraintVertical_bias="0.0" />
 
 

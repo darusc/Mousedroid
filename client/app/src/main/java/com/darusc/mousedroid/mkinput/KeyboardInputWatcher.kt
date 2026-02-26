@@ -3,13 +3,13 @@ package com.darusc.mousedroid.mkinput
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.darusc.mousedroid.networking.ConnectionManager
 
-class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
+class KeyboardInputWatcher(
+    private val editText: EditText,
+    private val sendInputCallback: (CharArray) -> Unit
+): TextWatcher {
 
     private val TAG = "Mousedroid"
-
-    private val connectionManager = ConnectionManager.getInstance()
 
     private var ignoreChange = false
 
@@ -22,7 +22,7 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
     override fun onTextChanged(text: CharSequence, start: Int, lengthBefore: Int, lengthAfter: Int) {
         if(!ignoreChange) {
             if(lengthAfter < lengthBefore){
-                connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, 127), true) // DEL
+                sendInputCallback(charArrayOf(127.toChar())) // DEL
                 if(start == 1 && lengthAfter == 0){
                     reset()
                 }
@@ -30,16 +30,17 @@ class KeyboardInputWatcher(private val editText: EditText): TextWatcher {
             else {
                 val c = if(text.isNotEmpty()) text[text.length - 1] else null
                 if(c == '\n'){
-                    connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, 10), true) // \n
+                    sendInputCallback(charArrayOf(10.toChar())) // \n
                     reset()
                 }
                 else {
                     if(lengthAfter == lengthBefore + 1) {
-                        connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, text[text.length - 1].code.toByte()), true)
+                        sendInputCallback(charArrayOf(text.last()))
                     }
                     else {
-                        val bytes = text.substring(start).map { it.code.toByte() }.toByteArray()
-                        connectionManager.sendBytes(byteArrayOf(Input.KEYPRESS, *bytes), true)
+                        val newText = text.subSequence(start, start + (lengthAfter - lengthBefore))
+                        val chars = newText.toString().toCharArray()
+                        sendInputCallback(chars)
                     }
                 }
             }

@@ -8,12 +8,8 @@ import android.content.IntentFilter
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresPermission
-import com.darusc.mousedroid.networking.ConnectionManager.Mode
+import com.darusc.mousedroid.networking.Connection.Mode
 
-fun getConnectionMode(context: Context): Mode {
-    val intent = context.registerReceiver(null, IntentFilter("android.hardware.usb.action.USB_STATE"))
-    return if(intent?.getBooleanExtra("connected", false) == true) Mode.USB else Mode.WIFI
-}
 
 @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
 fun getDeviceDetails(context: Context, connectionMode: Mode): String {

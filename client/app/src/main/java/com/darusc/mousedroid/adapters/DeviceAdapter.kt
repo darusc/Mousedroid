@@ -1,6 +1,5 @@
 package com.darusc.mousedroid.adapters
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,13 +10,12 @@ import com.darusc.mousedroid.R
 import java.util.ArrayList
 
 class DeviceAdapter(
-    private val context: Context?,
-    private val devices: ArrayList<Pair<String, String>>,
+    val devices: ArrayList<Pair<String, String>>,
     private val listener: OnItemClickListener
 ) : RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
 
     interface OnItemClickListener {
-        fun onItemClick(address: String)
+        fun onItemClick(name: String, address: String)
         fun onItemLongClick(position: Int)
     }
 
@@ -41,7 +39,7 @@ class DeviceAdapter(
         vh.deviceAddress.text = address
 
         vh.wrapper.setOnClickListener {
-            listener.onItemClick(address)
+            listener.onItemClick(name, address)
         }
 
         vh.wrapper.setOnLongClickListener {

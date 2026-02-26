@@ -5,15 +5,21 @@ import android.os.Looper
 import android.view.*
 import androidx.core.view.GestureDetectorCompat
 import com.darusc.mousedroid.networking.ConnectionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.math.ln
 
 /**
  * Class that handles simples gestures (tap, long press, scroll) using
  * a GestureDetectorCompat
  */
-class GestureHandler(context: Context): View.OnTouchListener {
+class GestureHandler(
+    context: Context,
+    private val sendInputCallback: (InputEvent) -> (Unit)
+) : View.OnTouchListener {
 
     private val TAG = "Mousedroid"
     private val EV_DELAY_MILLIS: Long = 150
@@ -25,100 +31,138 @@ class GestureHandler(context: Context): View.OnTouchListener {
         var doublePress: Boolean,
         var lastDoublePress: Long,
         var dragging: Boolean,
+        var activeMouseWhileDragging: InputEvent.MouseButton
     )
-    private val state = State(false, 0, false, 0, false)
 
-    private val connectionManager = ConnectionManager.getInstance()
+    private val state = State(false, 0, false, 0, false, InputEvent.MouseButton.NONE)
 
     /**
      * Detector used for detecting scaling (pinch to zoom)
      */
-    private val scaleDetector: ScaleGestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        override fun onScale(detector: ScaleGestureDetector): Boolean {
-            val scale = (ln(detector.scaleFactor) * 500).toInt().coerceIn(-128, 127).toByte()
-            connectionManager.sendBytes(byteArrayOf(Input.ZOOM, scale), true)
+    private val scaleDetector: ScaleGestureDetector =
+        ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
-            return true
-        }
-    })
+            private var accumulatedZoom = 0f
+            private val ZOOM_PIXEL_THRESHOLD = 20f
+
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                // Calculate the raw distance change in pixels
+                val deltaPixels = detector.currentSpan - detector.previousSpan
+
+                accumulatedZoom += deltaPixels
+                if (abs(accumulatedZoom) >= ZOOM_PIXEL_THRESHOLD) {
+                    // Calculate how many "ticks" this equals
+                    val ticks = (accumulatedZoom / ZOOM_PIXEL_THRESHOLD).toInt()
+                    if (ticks != 0) {
+                        sendInputCallback(InputEvent.Zoom(ticks))
+                        // Remove the consumed part, keeping the remainder for smooth scaling
+                        accumulatedZoom -= (ticks * ZOOM_PIXEL_THRESHOLD)
+                    }
+                }
+
+                return true
+            }
+        })
+//    private val scaleDetector: ScaleGestureDetector =
+//        ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+//            override fun onScale(detector: ScaleGestureDetector): Boolean {
+//                val scale = (ln(detector.scaleFactor) * 500).toInt().coerceIn(-128, 127).toByte()
+//                if (!state.dragging) {
+//                    connectionManager.send(InputEvent.Zoom(scale.toInt()), true)
+//                }
+//
+//                return true
+//            }
+//        })
 
     /**
      * Detector used for gestures like: tap, double tap, move, drag and scroll
      */
-    private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            // Post a runnable that sends a click event after a set delay
-            // onDoubleTap will cancel it when called
-            singleTapRunnable = Runnable {
-                connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
-            }
-            handler.postDelayed(singleTapRunnable!!, EV_DELAY_MILLIS)
-            return super.onSingleTapUp(e)
-        }
-
-        override fun onDoubleTap(e: MotionEvent): Boolean {
-            // Cancel the click event from the single tap
-            singleTapRunnable?.let { handler.removeCallbacks(it) }
-
-            state.doublePress = true
-            state.lastDoublePress = System.currentTimeMillis()
-
-            // Post a runnable that will send 2 click events after a set time
-            // If before that a move event is detected by the onTouch, it will be canceled
-            doubleTapRunnable = Runnable {
-                connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
-                connectionManager.sendBytes(byteArrayOf(Input.LCLICK), true)
-                state.doublePress = false
-                state.dragging = false
-            }
-            handler.postDelayed(doubleTapRunnable!!, EV_DELAY_MILLIS)
-            return false
-        }
-
-        override fun onScroll(
-            e1: MotionEvent,
-            e2: MotionEvent,
-            distanceX: Float,
-            distanceY: Float
-        ): Boolean {
-            if((e1.pointerCount == 2 || e2.pointerCount == 2) || System.currentTimeMillis() - state.lastScrolled < EV_DELAY_MILLIS) {
-                if(abs(distanceX) < SCROLL_TRESHOLD && abs(distanceY) < SCROLL_TRESHOLD) {
-                    return super.onScroll(e1, e2, distanceX, distanceY)
+    private val gestureDetector: GestureDetectorCompat =
+        GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapUp(e: MotionEvent): Boolean {
+                // Post a runnable that sends a click event after a set delay
+                // onDoubleTap will cancel it when called
+                singleTapRunnable = Runnable {
+                    sendInputCallback(InputEvent.MouseClick(InputEvent.MouseButton.LEFT))
                 }
+                handler.postDelayed(singleTapRunnable!!, EV_DELAY_MILLIS)
+                return super.onSingleTapUp(e)
+            }
 
-                // If at least one event has 2 pointers and the time before last scroll is less than 500ms
-                // we continue to scroll
-                state.scrolling = true
-                state.lastScrolled = System.currentTimeMillis()
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                // Cancel the click event from the single tap
+                singleTapRunnable?.let { handler.removeCallbacks(it) }
 
-                val type: Byte
-                val delta: Float
-                if(abs(distanceY) > abs(distanceX)) {
-                    // Vertical scrolling
-                    type = Input.SCROLL
-                    delta = -distanceY
+                state.doublePress = true
+                state.lastDoublePress = System.currentTimeMillis()
+
+                // Post a runnable that will send 2 click events after a set time
+                // If before that a move event is detected by the onTouch, it will be canceled
+                doubleTapRunnable = Runnable {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        sendInputCallback(InputEvent.MouseClick(InputEvent.MouseButton.LEFT))
+                        // Add delay so the 2 clicks are registered when sent via bluetooth
+                        // TODO() might break over TCP/UDP
+                        delay(75)
+                        sendInputCallback(InputEvent.MouseClick(InputEvent.MouseButton.LEFT))
+
+                        state.doublePress = false
+                        state.dragging = false
+                    }
+                }
+                handler.postDelayed(doubleTapRunnable!!, EV_DELAY_MILLIS)
+                return false
+            }
+
+            override fun onScroll(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                distanceX: Float,
+                distanceY: Float
+            ): Boolean {
+                if ((e1?.pointerCount == 2 || e2.pointerCount == 2) || System.currentTimeMillis() - state.lastScrolled < EV_DELAY_MILLIS) {
+                    if (abs(distanceX) < SCROLL_TRESHOLD && abs(distanceY) < SCROLL_TRESHOLD) {
+                        return super.onScroll(e1, e2, distanceX, distanceY)
+                    }
+
+                    // If at least one event has 2 pointers and the time before last scroll is less than 500ms
+                    // we continue to scroll
+                    state.scrolling = true
+                    state.lastScrolled = System.currentTimeMillis()
+
+                    val type: Byte
+                    val delta: Float
+                    if (abs(distanceY) > abs(distanceX)) {
+                        // Vertical scrolling
+                        sendInputCallback(
+                            InputEvent.MouseScroll(
+                                0,
+                                -distanceY.toInt().coerceIn(-128, 127)
+                            )
+                        )
+                    } else {
+                        // Horizontal scrolling
+                        sendInputCallback(
+                            InputEvent.MouseScroll(
+                                -distanceX.toInt().coerceIn(-128, 127), 0
+                            )
+                        )
+                    }
                 } else {
-                    // Horizontal scrolling
-                    type = Input.SCROLL_H
-                    delta = -distanceX
+                    // We consider to be just moving if there is 1 pointer in both events
+                    sendInputCallback(
+                        InputEvent.MouseMove(
+                            distanceX.toInt().coerceIn(-128, 127),
+                            distanceY.toInt().coerceIn(-128, 127),
+                            state.activeMouseWhileDragging
+                        )
+                    )
                 }
 
-                connectionManager.sendBytes(byteArrayOf(type, delta.toInt().coerceIn(-128, 127).toByte()), true)
+                return super.onScroll(e1, e2, distanceX, distanceY)
             }
-            else {
-                // We consider to be just moving if there is 1 pointer in both events
-                connectionManager.sendBytes(
-                    byteArrayOf(
-                        Input.MOVE,
-                        distanceX.toInt().coerceIn(-128, 127).toByte(),
-                        distanceY.toInt().coerceIn(-128, 127).toByte()),
-                    true)
-            }
-
-            return super.onScroll(e1, e2, distanceX, distanceY)
-        }
-    })
-
+        })
 
 
     private val handler = android.os.Handler(Looper.getMainLooper())
@@ -127,34 +171,35 @@ class GestureHandler(context: Context): View.OnTouchListener {
 
     override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
 
-        if(p1?.actionMasked == MotionEvent.ACTION_POINTER_UP && p1.pointerCount == 2) {
-            if(state.scrolling) {
+        if (p1?.actionMasked == MotionEvent.ACTION_POINTER_UP && p1.pointerCount == 2) {
+            if (state.scrolling) {
                 // Cancel scrolling when pointer is lifted up
                 state.scrolling = false
                 return false
-            } else if(System.currentTimeMillis() - state.lastScrolled > 500) {
+            } else if (System.currentTimeMillis() - state.lastScrolled > 500) {
                 // Right click is detected when there are 2 pointers and 1 starts to lift
                 // Can't be detected in onSingleTapUp because the 2 pointers are not lifted at the same time
                 // so we don't get that event with 2 pointers but rather 2 different events with 1 pointer
-                connectionManager.sendBytes(byteArrayOf(Input.RCLICK), true)
+                sendInputCallback(InputEvent.MouseClick(InputEvent.MouseButton.RIGHT))
             }
         }
 
-        if(p1?.action == MotionEvent.ACTION_UP && state.dragging) {
+        if (p1?.action == MotionEvent.ACTION_UP && state.dragging) {
             // Cancel dragging
             state.scrolling = false
             state.doublePress = false
-            connectionManager.sendBytes(byteArrayOf(Input.UP), true)
+            state.activeMouseWhileDragging = InputEvent.MouseButton.NONE
+            sendInputCallback(InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, false))
         }
 
-        if(p1?.let { gestureDetector.onTouchEvent(it) } == true) {
+        if (p1?.let { gestureDetector.onTouchEvent(it) } == true) {
             return true
         }
         p1?.let { scaleDetector.onTouchEvent(it) }
 
-        when(p1?.action) {
+        when (p1?.action) {
             MotionEvent.ACTION_MOVE -> {
-                if(state.doublePress && System.currentTimeMillis() - state.lastDoublePress < EV_DELAY_MILLIS) {
+                if (state.doublePress && System.currentTimeMillis() - state.lastDoublePress < EV_DELAY_MILLIS) {
                     // If a move event is triggered right after a double press initiate dragging
                     // Can't be detected in onTouch because it seem like the detector classified that event
                     // as a double tap and won't detect a new scroll event right after
@@ -163,9 +208,14 @@ class GestureHandler(context: Context): View.OnTouchListener {
                     doubleTapRunnable?.let { handler.removeCallbacks(it) }
                     state.doublePress = false
                     state.dragging = true
-
+                    state.activeMouseWhileDragging = InputEvent.MouseButton.LEFT
                     // Send a mouse down event to initiate dragging
-                    connectionManager.sendBytes(byteArrayOf(Input.DOWN), true)
+                    sendInputCallback(
+                        InputEvent.MouseDragState(
+                            InputEvent.MouseButton.LEFT,
+                            true
+                        )
+                    )
 
                     val cancelEvent = MotionEvent.obtain(p1)
                     cancelEvent.action = MotionEvent.ACTION_CANCEL

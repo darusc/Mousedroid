@@ -1,29 +1,31 @@
 package com.darusc.mousedroid.fragments
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import com.darusc.mousedroid.mkinput.Input
+import androidx.fragment.app.activityViewModels
 import com.darusc.mousedroid.R
-import com.darusc.mousedroid.networking.ConnectionManager
+import com.darusc.mousedroid.databinding.FragmentNumpadBinding
+import com.darusc.mousedroid.viewmodels.NumpadViewModel
 
 class Numpad : Fragment() {
+
+    private lateinit var binding: FragmentNumpadBinding
+
+    private val viewModel: NumpadViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        return inflater.inflate(R.layout.fragment_numpad, container, false)
-    }
+    ): View {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_numpad, container, false)
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
-    companion object {
-        fun onNumpadButtonClickListener(view: View) {
-            ConnectionManager.getInstance().sendBytes(byteArrayOf(Input.KEYPRESS, view.tag.toString().toInt().toByte()), true)
-        }
+        return binding.root
     }
 }

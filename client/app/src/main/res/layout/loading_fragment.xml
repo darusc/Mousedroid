@@ -6,6 +6,7 @@
     android:background="#121212">
 
     <TextView
+        android:id="@+id/loadingMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connecting..."

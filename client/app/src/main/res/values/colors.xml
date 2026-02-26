@@ -4,11 +4,18 @@
     <color name="background">#121212</color>
 <!--    <color name="numpadHighlight">#AF4F6F8F</color>-->
     <color name="numpadHighlight">#b2b2b2</color>
+    <color name="numpadHighlight2">#AFB2B2B2</color>
     <color name="card_dark">#222222</color>
     <color name="card_text">#e7e7e7</color>
     <color name="card_text2">#8b8b8b</color>
     <color name="toolbar_text">#c9c9c9</color>
     <color name="primary">#007bed</color>
+
+    <color name="bg_dark">#121212</color>
+    <color name="accent_blue">#00E5FF</color>
+    <color name="card_gray">#1E1E1E</color>
+    <color name="button_gray">#2C2C2C</color>
+    <color name="white">#FFFFFF</color>
 
     <color name="seed">#6750A4</color>
     <color name="md_theme_light_primary">#6750A4</color>
