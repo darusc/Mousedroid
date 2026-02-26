@@ -64,13 +64,13 @@ class TCPConnection(
                 val bytes = inputStream?.read(buf)
                 // When connected over ADB stream end of file might be reached
                 if(isOverAdb && bytes == -1) {
-                    listener.onDisconnected()
+                    onDisconnected()
                     break
                 }
                 listener.onBytesReceived(buf, bytes ?: 0)
             } catch (e: Exception) {
                 Log.e(TAG, "Error while reading. Closing socket. ${e.message}")
-                listener.onDisconnected()
+                onDisconnected()
                 break
             }
         }
@@ -80,5 +80,11 @@ class TCPConnection(
         running.set(false)
         socket.close()
         thread.join()
+    }
+
+    private fun onDisconnected() {
+        val host = socket.inetAddress.hostAddress ?: "x.x.x.x"
+        val mode = if (host == "127.0.0.1") Mode.USB else Mode.WIFI
+        listener.onDisconnected(mode, host)
     }
 }

@@ -74,6 +74,7 @@ class BluetoothConnection(
         override fun onConnectionStateChanged(device: BluetoothDevice?, state: Int) {
             super.onConnectionStateChanged(device, state)
 
+            val hostname = bluetoothHostDevice?.name ?: "Unknown"
             bluetoothHostDevice = if (state == BluetoothProfile.STATE_CONNECTED) device else null
 
             when (state) {
@@ -83,7 +84,7 @@ class BluetoothConnection(
                     Log.d("Mousedroid", "Connected!")
                     connectionAttempts = 0
                     connectionEstablished = true
-                    listener.onConnected(Mode.BLUETOOTH)
+                    listener.onConnected(Mode.BLUETOOTH, bluetoothHostDevice?.name ?: "Unknown device")
 
                     // Send a battery report after connecting
                     CoroutineScope(Dispatchers.IO).launch {
@@ -107,7 +108,7 @@ class BluetoothConnection(
                             // Host turned off or went out of range after the connection
                             // was established. Instant disconnect
                             Log.d("Mousedroid", "Active session lost. Disconnecting instantly.")
-                            listener.onDisconnected()
+                            listener.onDisconnected(Mode.BLUETOOTH, hostname)
                             connectionEstablished = false
                         } else if (connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
                             // If connection was rejected instantly retry silently
@@ -126,8 +127,7 @@ class BluetoothConnection(
                             // Connection still failed after all retry attempts
                             Log.d("Mousedroid", "Connection failed after 3 attempts")
                             connectionAttempts = 0
-                            // TO DO - Change to connection failed
-                            listener.onDisconnected()
+                            listener.onConnectionFailed(Mode.BLUETOOTH)
                         }
                     }
                 }

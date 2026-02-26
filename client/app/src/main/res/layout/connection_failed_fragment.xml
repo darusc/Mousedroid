@@ -10,36 +10,35 @@
     android:paddingHorizontal="20dp">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif-light"
         android:gravity="center"
         android:text="Connection failed"
         android:textColor="@color/md_theme_dark_error"
         android:textSize="24sp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp"
-        android:fontFamily="sans-serif-light"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Connection to Mousedroid server failed."
         android:gravity="center"
         android:textColor="@color/md_theme_dark_error"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        tools:text="Connection to Mousedroid server failed." />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Make sure the server is on.\nIf you connected via USB make sure ADB is on.\nIf you want to connect via WIFI make sure the phone and the computer are on the same LAN"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/subtitle"
+        tools:text="Make sure the server is on and you are on the same LAN." />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnOK"
@@ -53,10 +52,7 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
-        app:layout_constraintVertical_bias="0.0" />
-
+        app:layout_constraintTop_toBottomOf="@+id/description" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

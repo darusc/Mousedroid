@@ -58,30 +58,30 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
 
     interface ConnectionStateCallback {
         fun onConnectionInitiated(mode: Connection.Mode) {}
-        fun onConnectionSuccessful(connectionMode: Connection.Mode) {}
+        fun onConnectionSuccessful(connectionMode: Connection.Mode, hostName: String) {}
         fun onConnectionFailed(connectionMode: Connection.Mode) {}
-        fun onDisconnected() {}
+        fun onDisconnected(connectionMode: Connection.Mode, hostName: String) {}
     }
 
     private fun setConnectionStateCallback(connectionStateCallback: ConnectionStateCallback) {
         this.connectionStateCallback = connectionStateCallback
     }
 
-    override fun onConnected(connectionMode: Connection.Mode) {
-        if (connectionMode == Connection.Mode.BLUETOOTH) {
-            // Notify only for bluetooth mode. For USB and WIFI onConnectionSuccessful is called
-            // right after socket creation
-            connectionStateCallback?.onConnectionSuccessful(connectionMode)
-            connected = true
-        }
+    override fun onConnected(connectionMode: Connection.Mode, hostName: String) {
+        connected = true
+        connectionStateCallback?.onConnectionSuccessful(connectionMode, hostName)
+    }
+
+    override fun onConnectionFailed(connectionMode: Connection.Mode) {
+        connectionStateCallback?.onConnectionFailed(connectionMode)
     }
 
     override fun onBytesReceived(buffer: ByteArray, bytes: Int) {}
 
     @RequiresApi(Build.VERSION_CODES.P)
-    override fun onDisconnected() {
+    override fun onDisconnected(connectionMode: Connection.Mode, hostName: String) {
         disconnect()
-        connectionStateCallback?.onDisconnected()
+        connectionStateCallback?.onDisconnected(connectionMode, hostName)
     }
 
     override fun onBatteryPercentChanged(percentage: Int) {
@@ -101,8 +101,7 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
                 tcpConn = TCPConnection(ipAddress, port, false, this@ConnectionManager)
                 udpConn = UDPConnection(ipAddress, port)
                 tcpConn!!.sendBytes(deviceDetails.toByteArray())
-                connectionStateCallback?.onConnectionSuccessful(Connection.Mode.WIFI)
-                connected = true
+                onConnected(Connection.Mode.WIFI, ipAddress)
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
                 connectionStateCallback?.onConnectionFailed(Connection.Mode.WIFI)
@@ -120,8 +119,7 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
             try {
                 tcpConn = TCPConnection("127.0.0.1", port, true, this@ConnectionManager)
                 tcpConn!!.sendBytes(deviceDetails.toByteArray())
-                connectionStateCallback?.onConnectionSuccessful(Connection.Mode.USB)
-                connected = true
+                onConnected(Connection.Mode.USB, "127.0.0.1")
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
                 connectionStateCallback?.onConnectionFailed(Connection.Mode.USB)

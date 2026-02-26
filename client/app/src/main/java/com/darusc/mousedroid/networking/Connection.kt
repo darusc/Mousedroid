@@ -16,9 +16,10 @@ abstract class Connection {
     class ConnectionFailedException(host: String) : Exception("Connection to $host failed!")
 
     interface Listener {
-        fun onConnected(connectionMode: Mode)
+        fun onConnected(connectionMode: Mode, hostName: String)
+        fun onConnectionFailed(connectionMode: Mode)
         fun onBytesReceived(buffer: ByteArray, bytes: Int)
-        fun onDisconnected()
+        fun onDisconnected(connectionMode: Mode, hostName: String)
     }
 
     abstract fun send(event: InputEvent)

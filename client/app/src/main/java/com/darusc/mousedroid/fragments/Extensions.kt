@@ -2,6 +2,7 @@ package com.darusc.mousedroid.fragments
 
 import android.content.Context
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import android.widget.PopupWindow
 import androidx.annotation.LayoutRes
@@ -10,8 +11,8 @@ import androidx.fragment.app.Fragment
 import com.darusc.mousedroid.R
 import com.google.android.material.button.MaterialButton
 
-fun Fragment.showPopupDialog(@LayoutRes fragmentId: Int) {
-    val rootView = view ?: return
+fun Fragment.showPopupDialog(@LayoutRes fragmentId: Int): View? {
+    val rootView = view ?: return null
 
     val pView = layoutInflater.inflate(fragmentId, null)
     val popup = PopupWindow(
@@ -29,6 +30,8 @@ fun Fragment.showPopupDialog(@LayoutRes fragmentId: Int) {
         popup.showAtLocation(rootView, Gravity.CENTER, 0, 0)
         popup.dim(0.6f)
     }
+
+    return pView
 }
 
 // https://stackoverflow.com/questions/35874001/dim-the-background-using-popupwindow-in-android

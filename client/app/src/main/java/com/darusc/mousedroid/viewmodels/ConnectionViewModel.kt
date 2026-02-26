@@ -23,7 +23,7 @@ class ConnectionViewModel :
     sealed class State : BaseViewModel.State() {
         object Idle : State()
         data class Connecting(val message: String) : State()
-        object Connected : State()
+        data class Connected(val connectionMode: Connection.Mode, val hostName: String) : State()
     }
 
     sealed class Event : BaseViewModel.Event() {
@@ -31,9 +31,11 @@ class ConnectionViewModel :
         object NavigateToInput : Event()
         object NavigateToMain : Event()
         object NavigateToDeviceList : Event()
-        object ConnectionFailed : Event()
-        object ConnectionDisconnected : Event()
+
         object EnableBluetooth : Event()
+
+        data class ConnectionFailed(val connectionMode: Connection.Mode) : Event()
+        data class ConnectionDisconnected(val connectionMode: Connection.Mode, val hostName: String) : Event()
     }
 
     private val connectionManager = ConnectionManager.getInstance(this)
@@ -44,21 +46,21 @@ class ConnectionViewModel :
         }
     }
 
-    override fun onConnectionSuccessful(connectionMode: Connection.Mode) {
-        setState(State.Connected)
+    override fun onConnectionSuccessful(connectionMode: Connection.Mode, hostName: String) {
+        setState(State.Connected(connectionMode, hostName))
         sendEvent(Event.NavigateToInput)
     }
 
     override fun onConnectionFailed(connectionMode: Connection.Mode) {
         setState(State.Idle)
-        sendEvent(Event.ConnectionFailed)
+        sendEvent(Event.ConnectionFailed(connectionMode))
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
-    override fun onDisconnected() {
+    override fun onDisconnected(connectionMode: Connection.Mode, hostName: String) {
         // Hardware link was lost (e.g host device's bluetooth was turned off)
         setState(State.Idle)
-        sendEvent(Event.ConnectionDisconnected)
+        sendEvent(Event.ConnectionDisconnected(connectionMode, hostName))
         sendEvent(Event.NavigateToMain)
     }
 
