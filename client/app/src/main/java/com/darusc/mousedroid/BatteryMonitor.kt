@@ -17,6 +17,13 @@ class BatteryMonitor {
                 return instance ?: BatteryMonitor().also { instance = it }
             }
         }
+
+        fun getBatteryLevel(context: Context): Int {
+            val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+
+            return level
+        }
     }
 
     interface Listener {

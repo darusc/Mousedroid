@@ -14,6 +14,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.startActivity
+import com.darusc.mousedroid.BatteryMonitor
 import com.darusc.mousedroid.layouts.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.Connection
@@ -62,7 +63,7 @@ class BluetoothConnection(
     )
 
     /**
-     * SDP settings used for registering the app with the bluetooth HID device
+     * QOS settings used for registering the app with the bluetooth HID device
      */
     private val qos = BluetoothHidDeviceAppQosSettings(
         BluetoothHidDeviceAppQosSettings.SERVICE_BEST_EFFORT,
@@ -83,6 +84,15 @@ class BluetoothConnection(
                     connectionAttempts = 0
                     connectionEstablished = true
                     listener.onConnected(Mode.BLUETOOTH)
+
+                    // Send a battery report after connecting
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(3000)
+                        if (bluetoothHostDevice != null) {
+                            val level = BatteryMonitor.getBatteryLevel(context)
+                            send(InputEvent.BatteryEvent(level))
+                        }
+                    }
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> Log.d("Mousedroid", "Disconnecting...")
@@ -116,6 +126,7 @@ class BluetoothConnection(
                             // Connection still failed after all retry attempts
                             Log.d("Mousedroid", "Connection failed after 3 attempts")
                             connectionAttempts = 0
+                            // TO DO - Change to connection failed
                             listener.onDisconnected()
                         }
                     }
