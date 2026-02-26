@@ -64,7 +64,7 @@ class Input: Fragment() {
                 keyboardViewModel.handleKeypress(bytes)
             })
             // Don't close the keyboard when pressing enter
-            setOnEditorActionListener { _, _, _ -> true }
+            // setOnEditorActionListener { _, _, _ -> true }
         }
 
         // Remove the focus from the hidden text input and clear its text

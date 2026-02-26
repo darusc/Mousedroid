@@ -6,7 +6,7 @@ import android.widget.EditText
 
 class KeyboardInputWatcher(
     private val editText: EditText,
-    private val sendInputCallback: (ByteArray) -> Unit
+    private val sendInputCallback: (CharArray) -> Unit
 ): TextWatcher {
 
     private val TAG = "Mousedroid"
@@ -22,7 +22,7 @@ class KeyboardInputWatcher(
     override fun onTextChanged(text: CharSequence, start: Int, lengthBefore: Int, lengthAfter: Int) {
         if(!ignoreChange) {
             if(lengthAfter < lengthBefore){
-                sendInputCallback(byteArrayOf(127)) // DEL
+                sendInputCallback(charArrayOf(127.toChar())) // DEL
                 if(start == 1 && lengthAfter == 0){
                     reset()
                 }
@@ -30,17 +30,17 @@ class KeyboardInputWatcher(
             else {
                 val c = if(text.isNotEmpty()) text[text.length - 1] else null
                 if(c == '\n'){
-                    sendInputCallback(byteArrayOf(10)) // \n
+                    sendInputCallback(charArrayOf(10.toChar())) // \n
                     reset()
                 }
                 else {
                     if(lengthAfter == lengthBefore + 1) {
-                        sendInputCallback(byteArrayOf(text.last().code.toByte()))
+                        sendInputCallback(charArrayOf(text.last()))
                     }
                     else {
-                        val newText = text.substring(start, start + (lengthAfter - lengthBefore))
-                        val bytes = newText.toByteArray(Charsets.UTF_8)
-                        sendInputCallback(bytes)
+                        val newText = text.subSequence(start, start + (lengthAfter - lengthBefore))
+                        val chars = newText.toString().toCharArray()
+                        sendInputCallback(chars)
                     }
                 }
             }

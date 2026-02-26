@@ -11,7 +11,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.darusc.mousedroid.layouts.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
 import com.darusc.mousedroid.networking.Connection
 import com.darusc.mousedroid.networking.toHIDReport
@@ -140,6 +139,9 @@ class BluetoothConnection(
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.HID_DEVICE) {
                     bluetoothHIDDevice = proxy as BluetoothHidDevice
+                    // Unregister first to clear "ghost states" caused by
+                    // incorrect closing
+                    bluetoothHIDDevice?.unregisterApp()
                     bluetoothHIDDevice!!.registerApp(
                         sdp,
                         null,

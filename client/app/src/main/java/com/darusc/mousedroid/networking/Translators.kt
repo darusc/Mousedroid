@@ -120,7 +120,7 @@ fun InputEvent.toHIDReport(): Array<HIDReport> {
             if (vScroll.toInt() != 0) {
                 reports.add(MouseReport(0, 0, 0, vScroll))
             } else if (hScroll.toInt() != 0) {
-                reports.add(KeyboardReport((Keycode.MOD_LEFT_SHIFT ushr 8).toByte(), 0)) // Hold Shift
+                reports.add(KeyboardReport(Keycode.MOD_LEFT_SHIFT, 0)) // Hold Shift
                 reports.add(MouseReport(0, 0, 0, hScroll))              // Scroll
                 reports.add(KeyboardReport(0, 0))                       // Release Shift
             }
@@ -140,7 +140,7 @@ fun InputEvent.toHIDReport(): Array<HIDReport> {
             val zoom = this.scale.coerceIn(-127, 127).toByte()
             if (zoom.toInt() != 0) {
                 arrayOf(
-                    KeyboardReport((Keycode.MOD_LEFT_CTRL ushr 8).toByte()),   // Press CTRL
+                    KeyboardReport(Keycode.MOD_LEFT_CTRL),   // Press CTRL
                     MouseReport(0, 0, 0, zoom),                 // Scroll
                     KeyboardReport(0)                                 // Release CTRL
                 )
