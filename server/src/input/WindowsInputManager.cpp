@@ -1,6 +1,7 @@
 #ifdef _WIN32
 
 #include "input/WindowsInputManager.hpp"
+#include "input/keymap_win32.h"
 
 namespace InputManager
 {
@@ -9,41 +10,6 @@ namespace InputManager
 
     Windows::Windows() { }
     Windows::~Windows() { }
-
-    std::pair<int, bool> Windows::getFromKeyMap(char c) const
-    {
-        for(auto k : KEYMAP)
-        {
-            if(k.c == c)
-                return {k.keycode, k.shouldShift};
-        }
-
-        return {0, 0};
-    }
-
-    int Windows::parse_char(char c, bool &shiftPressed) const
-    {
-        shiftPressed = false;
-
-        if(c >= '0' && c <= '9')
-            return c;
-
-        if(c >= 'a' && c <= 'z')
-            return c - 32;
-
-        if(c >= 'A' && c <= 'Z')
-        {
-            shiftPressed = true;
-            return c;
-        }
-
-        else
-        {
-            auto res = getFromKeyMap(c);
-            shiftPressed = res.second;
-            return res.first;
-        }
-    }
 
     void Windows::click() const
     {
@@ -127,32 +93,57 @@ namespace InputManager
         SendInput(1, &input, sizeof(INPUT));
     }
 
-    void Windows::send_key(char c) const
+    void Windows::send_key(uint8_t keycode, uint8_t modifier) const
     {
-        INPUT inputs[4] = {};
+        INPUT inputs[20];
         ZeroMemory(inputs, sizeof(inputs));
+        int count = 0;
 
-        bool isShiftPressed;
-        int keycode = parse_char(c, isShiftPressed);
-
-        if(isShiftPressed)
+        // Extract modifier keys from the bitmask and add the to the input array
+        for(const auto& mod : MODMAP)
         {
-            inputs[0].type = INPUT_KEYBOARD;
-            inputs[0].ki.wVk = VK_SHIFT;
-
-            inputs[3].type = INPUT_KEYBOARD;
-            inputs[3].ki.wVk = VK_SHIFT;
-            inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
+            if(modifier & mod.first)
+            {
+                inputs[count].type = INPUT_KEYBOARD;
+                inputs[count].ki.wVk = mod.second;
+                inputs[count].ki.dwFlags = 0;
+                count++;
+            }
         }
 
-        inputs[1].type = INPUT_KEYBOARD;
-        inputs[1].ki.wVk = keycode;
+        auto it = KEYMAP.find(keycode);
+        if(it != KEYMAP.end())
+        {
+            WORD vk = it->second;
 
-        inputs[2].type = INPUT_KEYBOARD;
-        inputs[2].ki.wVk = keycode;
-        inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
+            // Key Down
+            inputs[count].type = INPUT_KEYBOARD;
+            inputs[count].ki.wVk = vk;
+            inputs[count].ki.dwFlags = 0;
+            count++;
 
-        SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+            // Key Up
+            inputs[count].type = INPUT_KEYBOARD;
+            inputs[count].ki.wVk = vk;
+            inputs[count].ki.dwFlags = KEYEVENTF_KEYUP;
+            count++;
+        }
+
+        // Release modifier keys in reverse order
+        for (auto it_mod = MODMAP.rbegin(); it_mod != MODMAP.rend(); ++it_mod) 
+        {
+            if (modifier & it_mod->first) 
+            {
+                inputs[count].type = INPUT_KEYBOARD;
+                inputs[count].ki.wVk = it_mod->second;
+                inputs[count].ki.dwFlags = KEYEVENTF_KEYUP;
+                count++;
+            }
+        }
+
+        if(count > 0) {
+            SendInput(count, inputs, sizeof(INPUT));
+        }
     }
 
     void Windows::zoom(int scale) const

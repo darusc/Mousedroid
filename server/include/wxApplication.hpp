@@ -24,7 +24,7 @@ class wxApplication : public wxApp, public Server::ConnectionListener
     private:
         wxMain *main_frame = nullptr;
         Server *server = nullptr;
-
+        
         INPUT_MANAGER inputManager;
         SettingsManager settings;
 

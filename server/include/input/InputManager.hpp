@@ -32,13 +32,6 @@ namespace InputManager
     extern int MOVE_SENSITIVITY;
     extern int SCROLL_SENSITIVITY;
     
-    struct KEY_PAIR
-    {
-        char c;
-        int keycode;
-        bool shouldShift;
-    };
-
     /**
      * @brief Base class to handle all input events.
      * Specialized os classes are dervived from this.
@@ -79,8 +72,7 @@ namespace InputManager
                         break;
 
                     case InputManager::KEYPRESS:
-                        for(int i = 1; i < size; i++)
-                            send_key(bytes[i]);
+                        send_key(bytes[1], bytes[2]);
                         break;
 
                     case InputManager::ZOOM:
@@ -88,12 +80,8 @@ namespace InputManager
                         break;
                 }
             }
-
-            virtual std::pair<int, bool> getFromKeyMap(char c) const = 0;
-
+            
         private:
-            virtual int parse_char(char c, bool &shiftPressed) const = 0;
-
             virtual void click() const = 0;
             virtual void right_click() const = 0;
             virtual void move(int dx, int dy) const = 0;
@@ -101,7 +89,7 @@ namespace InputManager
             virtual void scroll_h(int dx) const = 0;
             virtual void down() const = 0;
             virtual void up() const  = 0;
-            virtual void send_key(char c) const = 0;
+            virtual void send_key(uint8_t keycode, uint8_t modifier) const = 0;
             virtual void zoom(int scale) const = 0;
     };
 }

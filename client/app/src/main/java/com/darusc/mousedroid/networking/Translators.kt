@@ -60,28 +60,6 @@ private fun getMediaActionHIDBitmask(action: InputEvent.MediaAction): Short {
     }
 }
 
-private fun getNumpadKeyHIDUsageID(numpadKey: InputEvent.NumpadKey): Byte {
-    return when(numpadKey) {
-        InputEvent.NumpadKey.NUM1 -> 0x59.toByte()
-        InputEvent.NumpadKey.NUM2 -> 0x5A.toByte()
-        InputEvent.NumpadKey.NUM3 -> 0x5B.toByte()
-        InputEvent.NumpadKey.NUM4 -> 0x5C.toByte()
-        InputEvent.NumpadKey.NUM5 -> 0x5D.toByte()
-        InputEvent.NumpadKey.NUM6 -> 0x5E.toByte()
-        InputEvent.NumpadKey.NUM7 -> 0x5F.toByte()
-        InputEvent.NumpadKey.NUM8 -> 0x60.toByte()
-        InputEvent.NumpadKey.NUM9 -> 0x61.toByte()
-        InputEvent.NumpadKey.NUM0 -> 0x62.toByte()
-        InputEvent.NumpadKey.NUM_DOT -> 0x63.toByte()
-        InputEvent.NumpadKey.NUM_ENTER -> 0x58.toByte()
-        InputEvent.NumpadKey.NUM_PLUS  -> 0x57.toByte()
-        InputEvent.NumpadKey.NUM_MINUS -> 0x56.toByte()
-        InputEvent.NumpadKey.NUM_MULTIPLY -> 0x55.toByte()
-        InputEvent.NumpadKey.NUM_DIV -> 0x54.toByte()
-        InputEvent.NumpadKey.NUM_DEL -> 0x2A.toByte()
-    }
-}
-
 /**
  * Translate the input event to 1 or more bluetooth HID reports
  * (e.g mouse click requires 2 reports -> one for pressing the button and one for releasing)
@@ -150,9 +128,8 @@ fun InputEvent.toHIDReport(): Array<HIDReport> {
         }
 
         is InputEvent.NumpadKeyPress -> {
-            val usageid = getNumpadKeyHIDUsageID(this.key)
             arrayOf(
-                KeyboardReport(0x00, usageid),
+                KeyboardReport(0x00, this.key),
                 KeyboardReport(0)
             )
         }
@@ -201,9 +178,7 @@ fun InputEvent.toSocketReport(): ByteArray {
         }
 
         is InputEvent.KeyPress -> {
-            // TO DO - update server to work with the new keyboard layout system
-            //byteArrayOf(RawSocketEvents.KEYPRESS) + this.activeBytes
-            byteArrayOf()
+            byteArrayOf(RawSocketEvents.KEYPRESS, this.code, this.modifier)
         }
 
         else -> byteArrayOf()
