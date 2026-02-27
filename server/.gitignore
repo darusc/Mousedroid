@@ -1,3 +1,5 @@
 cmake
-.vscode
+.vscode/app.log
+.vscode/c_cpp_properties.json
+.vscode/settings.json
 resource.o
