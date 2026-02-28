@@ -1,6 +1,6 @@
-#include "net/Server.hpp"
+#include "net/server.h"
 
-#include "Logger.hpp"
+#include "logger.h"
 
 Server::Server(int port, const ConnectionListener& connectionListener, SettingsManager& settings, const INPUT_MANAGER& inputmanager)
 	: settings(settings), 

@@ -20,15 +20,15 @@ if(WIN32)
     
     # MSVC vs MinGW resource handling
     if(MSVC)
-        set(PLATFORM_SRC src/input/WindowsInputManager.cpp resource.rc)
+        set(PLATFORM_SRC "src/input/win32/windowsinputmanager.cpp" resource.rc)
     else()
-        set(PLATFORM_SRC src/input/WindowsInputManager.cpp resource.o)
+        set(PLATFORM_SRC "src/input/win32/windowsinputmanager.cpp" resource.o)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-subsystem,windows")
     endif()
 else()
     # Linux: Use system-installed wxWidgets
     find_package(wxWidgets REQUIRED net gl core base adv)
-    set(PLATFORM_SRC src/input/LinuxInputManager.cpp)
+    set(PLATFORM_SRC "src/input/linux/linuxinputmanager.cpp")
     set(PLATFORM_LIBS "")
     
     # Manual ASIO path for Linux
@@ -37,9 +37,19 @@ endif()
 
 # Collect all sources but avoid double-including input managers
 file(GLOB_RECURSE ALL_SRC src/*.cpp)
-list(FILTER ALL_SRC EXCLUDE REGEX "src/input/.*InputManager\\.cpp")
+
+if(WIN32)
+    set(PLATFORM_SRC "src/input/win32/windowsinputmanager.cpp")
+else()
+    set(PLATFORM_SRC "src/input/linux/linuxinputmanager.cpp")
+    set(PLATFORM_LIBS "")
+endif()
+
+list(REMOVE_ITEM ALL_SRC ${PLATFORM_SRC})
 
 add_executable(Mousedroid WIN32 ${ALL_SRC} ${PLATFORM_SRC})
+
+
 
 if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
@@ -52,7 +62,7 @@ if(WIN32)
     # vcpkg-installed asio provides an imported target
     target_link_libraries(Mousedroid PRIVATE asio::asio)
 else()
-    target_include_directories(Mousedroid PRIVATE ./include ${ASIO_INCLUDE_DIR})
+    target_include_directories(Mousedroid PRIVATE ./src ${ASIO_INCLUDE_DIR})
 endif()
 
-target_include_directories(Mousedroid PRIVATE ./include)
+target_include_directories(Mousedroid PRIVATE ./src)

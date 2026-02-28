@@ -1,8 +1,8 @@
-#include "wxApplication.hpp"
+#include "wxapplication.h"
 
 wxIMPLEMENT_APP(wxApplication);
 
-#include "icon.xpm"
+#include "../res/icon.xpm"
 
 wxApplication::wxApplication() { }
 

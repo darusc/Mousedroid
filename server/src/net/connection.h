@@ -6,7 +6,7 @@
 #include <asio.hpp>
 
 #include "input/input.h"
-#include "net/Device.hpp"
+#include "net/device.h"
 
 /// <summary>
 /// Manages a TCP connection

@@ -6,10 +6,10 @@
 #include <asio.hpp>
 #include <string>
 
-#include "Connection.hpp"
+#include "connection.h"
 #include "input/input.h"
-#include "SettingsManager.hpp"
-#include "Device.hpp"
+#include "settingsmanager.h"
+#include "device.h"
 
 /// <summary>
 /// Server implementation for the custom transmission protocol in use.

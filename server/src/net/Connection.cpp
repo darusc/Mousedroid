@@ -1,6 +1,6 @@
-#include "net/Connection.hpp"
+#include "net/connection.h"
 
-#include "Logger.hpp"
+#include "logger.h"
 
 Connection::Connection(const INPUT_MANAGER& inputmanager, tcp::socket socket, std::string& deviceDetails, OnDisconnectedListener onDisconnectedListener)
 	: inputmanager(inputmanager),

@@ -1,4 +1,4 @@
-#include "Logger.hpp"
+#include "logger.h"
 
 int Logger::rows = 0;
 wxListView* Logger::monitor;

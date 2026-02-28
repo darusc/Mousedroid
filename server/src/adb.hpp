@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <string>
 
-#include "Logger.hpp"
+#include "logger.h"
 
 namespace adb
 {

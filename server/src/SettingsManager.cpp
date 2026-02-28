@@ -1,4 +1,4 @@
-#include "SettingsManager.hpp"
+#include "settingsmanager.h"
 
 #include "adb.hpp"
 
