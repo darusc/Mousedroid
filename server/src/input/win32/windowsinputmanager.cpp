@@ -164,6 +164,21 @@ namespace InputManager
 
         SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
     }
+
+    void Windows::media(uint8_t action) const
+    {
+        INPUT inputs[2] = {};
+		ZeroMemory(inputs, sizeof(inputs));
+
+		inputs[0].type = INPUT_KEYBOARD;
+		inputs[0].ki.wVk = MEDIAMAP.at(action);
+
+		inputs[1].type = INPUT_KEYBOARD;
+		inputs[1].ki.wVk = MEDIAMAP.at(action);
+		inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+
+		SendInput(2, inputs, sizeof(INPUT));
+    }
 }
 
 #endif

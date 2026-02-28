@@ -28,6 +28,7 @@ namespace InputManager
     const char KEYPRESS = 0x07;
     const char SCROLL_H = 0x08;
     const char ZOOM = 0x09;
+    const char MEDIA = 0x0A;
 
     extern int MOVE_SENSITIVITY;
     extern int SCROLL_SENSITIVITY;
@@ -75,6 +76,10 @@ namespace InputManager
                         send_key(bytes[1], bytes[2]);
                         break;
 
+                    case InputManager::MEDIA:
+                        media(bytes[1]);
+                        break;
+
                     case InputManager::ZOOM:
                         zoom(bytes[1]);
                         break;
@@ -91,5 +96,6 @@ namespace InputManager
             virtual void up() const  = 0;
             virtual void send_key(uint8_t keycode, uint8_t modifier) const = 0;
             virtual void zoom(int scale) const = 0;
+            virtual void media(uint8_t action) const = 0;
     };
 }

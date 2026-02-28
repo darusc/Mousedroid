@@ -9,6 +9,7 @@ import com.darusc.mousedroid.networking.bluetooth.HIDReport
 import com.darusc.mousedroid.networking.bluetooth.KeyboardReport
 import com.darusc.mousedroid.networking.bluetooth.MediaReport
 import com.darusc.mousedroid.networking.bluetooth.MouseReport
+import kotlin.experimental.and
 
 /**
  * HID usage IDs used in translating the events into raw bytes for the HID protocol
@@ -31,6 +32,7 @@ private object RawSocketEvents {
     const val KEYPRESS: Byte = 0x07
     const val SCROLL_H: Byte = 0x08
     const val ZOOM: Byte = 0x09
+    const val MEDIA: Byte = 0x0A
 }
 
 private fun getMouseButtonHIDCode(button: InputEvent.MouseButton): Byte {
@@ -181,6 +183,15 @@ fun InputEvent.toSocketReport(): ByteArray {
             byteArrayOf(RawSocketEvents.KEYPRESS, this.code, this.modifier)
         }
 
-        else -> byteArrayOf()
+        is InputEvent.NumpadKeyPress -> {
+            byteArrayOf(RawSocketEvents.KEYPRESS, this.key, 0x00)
+        }
+
+        is InputEvent.MediaEvent -> {
+            val bitmask = getMediaActionHIDBitmask(this.action)
+            byteArrayOf(RawSocketEvents.MEDIA, (bitmask and 0xFF).toByte())
+        }
+
+        is InputEvent.BatteryEvent -> { byteArrayOf() }
     }
 }

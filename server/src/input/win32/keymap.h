@@ -160,10 +160,23 @@ namespace InputManager
         {0xE7, VK_RWIN}
     };
 
+    static const std::map<uint8_t, uint8_t> MEDIAMAP =
+    {
+        {0b00000001, VK_RIGHT},
+        {0b00000010, VK_LEFT},
+        {0b00000100, VK_MEDIA_NEXT_TRACK},
+        {0b00001000, VK_MEDIA_PREV_TRACK},
+        {0b00010000, VK_MEDIA_PLAY_PAUSE},
+        {0b00100000, VK_VOLUME_MUTE},
+        {0b01000000, VK_VOLUME_UP},
+        {0b10000000, VK_VOLUME_DOWN},
+    };
+
     /**
      * @brief Mapping of USB HID modifier bits to Windows virtual key codes.
      */
-    static const std::map<uint8_t, uint8_t> MODMAP = {
+    static const std::map<uint8_t, uint8_t> MODMAP = 
+    {
         {0x01, VK_LCONTROL}, 
         {0x02, VK_LSHIFT}, 
         {0x04, VK_LMENU},  
