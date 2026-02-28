@@ -10,7 +10,7 @@
 #include <time.h>
 #include <fstream>
 
-#define LOG(args...) Logger::log(args)
+#define LOG(...) Logger::log(__VA_ARGS__)
 
 namespace Logger
 {

@@ -1,43 +1,58 @@
 cmake_minimum_required(VERSION 3.26)
-include(CMakePrintHelpers)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# If find_package doesn't find wxWidgets, try settings the LIB_DIR or (and) the ROOT_DIR manually
-if(WIN32)
-    # set(wxWidgets_LIB_DIR $ENV{WXWIN}/lib/gcc_dll)
-    # set(wxWidgets_ROOT_DIR $ENV{WXWIN})
-endif()
-
-find_package(wxWidgets REQUIRED net gl core base adv)
-
 project(Mousedroid)
 
-file(GLOB_RECURSE SRC_FILES src/*.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-if(WIN32)
-
-    set(CMAKE_CXX_FLAGS "-Wl,-subsystem,windows")
-    set(SRC_FILES ${SRC_FILES} src/input/WindowsInputManager.cpp resource.o)
-    set(ASIO_PATH $ENV{ASIO})
-    set(LIBS ws2_32 wsock32)
-
-else()
-
-    set(SRC_FILES ${SRC_FILES} src/input/LinuxInputManager.cpp)
-    
-    # Set this if you downloaded the asio library
-    # set(ASIO_PATH <path_to_your_asio>)
-
+if(MSVC)
+    add_compile_options(/Zc:preprocessor)
 endif()
 
-add_executable(Mousedroid ${SRC_FILES})
+if(WIN32)
+    # On Windows, vcpkg handles wxWidgets and Asio automatically.
+    # find_package(asio CONFIG) is the vcpkg standard for Asio.
+    find_package(asio CONFIG REQUIRED)
+    find_package(wxWidgets REQUIRED net gl core base adv)
+    
+    # Define Windows-specific libraries (added user32 for SendInput)
+    set(PLATFORM_LIBS ws2_32 wsock32 user32)
+    
+    # MSVC vs MinGW resource handling
+    if(MSVC)
+        set(PLATFORM_SRC src/input/WindowsInputManager.cpp resource.rc)
+    else()
+        set(PLATFORM_SRC src/input/WindowsInputManager.cpp resource.o)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-subsystem,windows")
+    endif()
+else()
+    # Linux: Use system-installed wxWidgets
+    find_package(wxWidgets REQUIRED net gl core base adv)
+    set(PLATFORM_SRC src/input/LinuxInputManager.cpp)
+    set(PLATFORM_LIBS "")
+    
+    # Manual ASIO path for Linux
+    set(ASIO_INCLUDE_DIR "${ASIO_PATH}/include") 
+endif()
+
+# Collect all sources but avoid double-including input managers
+file(GLOB_RECURSE ALL_SRC src/*.cpp)
+list(FILTER ALL_SRC EXCLUDE REGEX "src/input/.*InputManager\\.cpp")
+
+add_executable(Mousedroid WIN32 ${ALL_SRC} ${PLATFORM_SRC})
 
 if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
-    target_link_libraries(Mousedroid ${wxWidgets_LIBRARIES})
+    target_link_libraries(Mousedroid PRIVATE ${wxWidgets_LIBRARIES})
 endif()
 
-target_link_libraries(Mousedroid ${LIBS})
+target_link_libraries(Mousedroid PRIVATE ${PLATFORM_LIBS})
 
-target_include_directories(Mousedroid PRIVATE ./include ${ASIO_PATH}/include)
+if(WIN32)
+    # vcpkg-installed asio provides an imported target
+    target_link_libraries(Mousedroid PRIVATE asio::asio)
+else()
+    target_include_directories(Mousedroid PRIVATE ./include ${ASIO_INCLUDE_DIR})
+endif()
+
+target_include_directories(Mousedroid PRIVATE ./include)
