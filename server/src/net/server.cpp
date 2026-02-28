@@ -7,10 +7,17 @@ Server::Server(int port, const ConnectionListener& connectionListener, SettingsM
 	inputmanager(inputmanager),
 	port(port),
 	connectionListener(connectionListener),
-	acceptor(tcp::acceptor(context, tcp::endpoint(tcp::v4(), port))),
+	acceptor(context),
 	udpsocket(context, udp::endpoint(asio::ip::udp::v4(), port))
 {
+	asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port);
+	acceptor.open(endpoint.protocol());
+	acceptor.set_option(tcp::acceptor::reuse_address(true));
+	acceptor.bind(endpoint);
+	acceptor.listen();
+
 	byteBuffer = new char[Connection::MAX_BUFFER_SIZE];
+	
 	settings.ADBOn();
 	StartReceive();
 }
@@ -54,17 +61,19 @@ void Server::Start()
 
 void Server::Close()
 {
-	LOG("[SERVER] Closing...");
+	LOG("[SERVER] Closing...\n");
 
-	settings.ADBOff();
+	asio::error_code ec;
+	acceptor.close(ec);
+	if (ec) LOG("[SERVER] Error closing acceptor: ", ec.message(), "\n");
 
-	acceptor.close();
-	udpsocket.close();
-	
+	udpsocket.close(ec);
+
 	for (std::shared_ptr<Connection> conn : connections)
 	{
 		conn->Close(true);
 	}
+	connections.clear();
 
 	context.stop();
 
@@ -74,6 +83,8 @@ void Server::Close()
 	}
 
 	LOG("[SERVER] Closed.\n");
+
+	settings.ADBOff();
 }
 
 std::vector<DeviceInfo> Server::GetConnectedDevicesInfo()

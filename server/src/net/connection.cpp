@@ -13,7 +13,7 @@ Connection::Connection(const INPUT_MANAGER& inputmanager, tcp::socket socket, st
 	std::vector<std::string> tokens;
 	while(std::getline(ss, token, '/'))
 		tokens.push_back(token);
-
+	
 	// Build the device info from the parsed tokens
 	deviceInfo.Manufacturer = tokens[0];
 	deviceInfo.Name = tokens[1];
