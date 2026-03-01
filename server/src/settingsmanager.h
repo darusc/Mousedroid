@@ -5,7 +5,7 @@
 #include <fstream>
 #include <map>
 
-#include "input/InputManager.hpp"
+#include "input/inputmanager.hpp"
 #include "logger.h"
 
 #ifdef _WIN32

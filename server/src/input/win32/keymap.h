@@ -1,6 +1,8 @@
 #ifndef KEYMAP_WIN32_H
 #define KEYMAP_WIN32_H
 
+#ifdef _WIN32
+
 #include "windows.h"
 #include <map>
 #include <stdint.h>
@@ -188,4 +190,5 @@ namespace InputManager
     };
 }
 
+#endif
 #endif

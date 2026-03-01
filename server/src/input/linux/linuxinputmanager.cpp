@@ -1,6 +1,7 @@
 #ifdef __unix__
 
-#include "input/LinuxInputManager.hpp"
+#include "input/linux/linuxinputmanager.h"
+#include "input/linux/keymap.h"
 
 namespace InputManager
 {
@@ -10,31 +11,53 @@ namespace InputManager
     Linux::Linux()
     {
         fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+        if (fd < 0) {
+            std::cerr << "[ERROR] Could not open /dev/uinput. Are you root? " 
+                    << strerror(errno) << std::endl;
+            return; 
+        }
 
         ioctl(fd, UI_SET_EVBIT, EV_KEY);
+        
         ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
         ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
+        ioctl(fd, UI_SET_KEYBIT, BTN_MIDDLE);
 
-        for(int i = 0; i <= 257; i++)
-        {
-            ioctl(fd, UI_SET_KEYBIT, i);
+        for(const auto& [hid, code] : KEYMAP) {
+            ioctl(fd, UI_SET_KEYBIT, code);
+        }
+
+        for(const auto& [bit, code] : MEDIAMAP) {
+            ioctl(fd, UI_SET_KEYBIT, code);
+        }
+
+        for(const auto& [bit, code] : MODMAP) {
+            ioctl(fd, UI_SET_KEYBIT, code);
         }
 
         ioctl(fd, UI_SET_EVBIT, EV_REL);
         ioctl(fd, UI_SET_RELBIT, REL_X);
         ioctl(fd, UI_SET_RELBIT, REL_Y);
         ioctl(fd, UI_SET_RELBIT, REL_WHEEL);
+        ioctl(fd, UI_SET_RELBIT, REL_HWHEEL);
+
+        ioctl(fd, UI_SET_EVBIT, EV_SYN);
 
         memset(&usetup, 0, sizeof(usetup));
         usetup.id.bustype = BUS_USB;
-        usetup.id.vendor = 0x1234;
-        usetup.id.product = 0x1234;
-        strcpy(usetup.name, "Mousedroid");
+        usetup.id.vendor  = 0x1234; 
+        usetup.id.product = 0x5678;
+        strncpy(usetup.name, "Mousedroid", UINPUT_MAX_NAME_SIZE);
 
-        ioctl(fd, UI_DEV_SETUP, &usetup);
-        ioctl(fd, UI_DEV_CREATE);
+        if (ioctl(fd, UI_DEV_SETUP, &usetup) < 0) {
+            std::cerr << "[ERROR] UI_DEV_SETUP failed." << std::endl;
+        }
+        if (ioctl(fd, UI_DEV_CREATE) < 0) {
+            std::cerr << "[ERROR] UI_DEV_CREATE failed." << std::endl;
+        }
 
-        sleep(1);
+        // Give the OS a moment to register the new HID device in the input stack
+        usleep(100000);
     }
 
     void Linux::emit(int fd, int type, int code, int val) const
@@ -48,33 +71,6 @@ namespace InputManager
         ie.time.tv_usec = 0;
 
         write(fd, &ie, sizeof(ie));
-    }
-
-    std::pair<int, bool> Linux::getFromKeyMap(char c) const
-    {
-        if(c >= 'a' && c <= 'z')
-            c -= 32;
-
-        for(auto k : KEYMAP)
-        {
-            if(k.c == c)
-                return {k.keycode, k.shouldShift};
-        }
-
-        return {0, 0};
-    }
-
-    int Linux::parse_char(char c, bool &shiftPressed) const
-    {
-        shiftPressed = false;
-
-        auto res = getFromKeyMap(c);
-        shiftPressed = res.second;
-
-        if(c >= 'a' && c <= 'z')    
-            shiftPressed = false;
-
-        return res.first;
     }
 
     void Linux::click() const
@@ -130,27 +126,35 @@ namespace InputManager
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
-    void Linux::send_key(char c) const
+    void Linux::send_key(uint8_t keycode, uint8_t modifier) const
     {
-        bool shiftPressed;
-        int code = parse_char(c, shiftPressed);
-
-        if(shiftPressed)
+        // Extract modifier keys from the bitmask and add the to the input array
+        for(const auto& mod : MODMAP)
         {
-            emit(fd, EV_KEY, KEY_LEFTSHIFT, 1);
-            emit(fd, EV_SYN, SYN_REPORT, 0);
+            if(modifier & mod.first)
+            {
+                emit(fd, EV_KEY, mod.second, 1);
+            }
         }
 
-        emit(fd, EV_KEY, code, 1);
-        emit(fd, EV_SYN, SYN_REPORT, 0);
-        emit(fd, EV_KEY, code, 0);
-        emit(fd, EV_SYN, SYN_REPORT, 0);
-
-        if(shiftPressed)
+        auto it = KEYMAP.find(keycode);
+        if(it != KEYMAP.end())
         {
-            emit(fd, EV_KEY, KEY_LEFTSHIFT, 0);
+            emit(fd, EV_KEY, it->second, 1);
             emit(fd, EV_SYN, SYN_REPORT, 0);
+            emit(fd, EV_KEY, it->second, 0);
         }
+
+        // Release modifier keys in reverse order
+        for (auto it_mod = MODMAP.rbegin(); it_mod != MODMAP.rend(); ++it_mod) 
+        {
+            if (modifier & it_mod->first) 
+            {
+                emit(fd, EV_KEY, it_mod->second, 0);
+            }
+        }
+
+        emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 
     void Linux::zoom(int scale) const
@@ -158,10 +162,19 @@ namespace InputManager
         emit(fd, EV_KEY, KEY_LEFTCTRL, 1);
         emit(fd, EV_SYN, SYN_REPORT, 0);
 
-        emit(fd, EV_REL, REL_WHEEL, scroll_amount);
+        emit(fd, EV_REL, REL_WHEEL, scale);
         emit(fd, EV_SYN, SYN_REPORT, 0);
         
         emit(fd, EV_KEY, KEY_LEFTCTRL, 0);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+    }
+
+    void Linux::media(uint8_t action) const
+    {
+        emit(fd, EV_KEY, MEDIAMAP.at(action), 1);
+        emit(fd, EV_SYN, SYN_REPORT, 0);
+
+        emit(fd, EV_KEY, MEDIAMAP.at(action), 0);
         emit(fd, EV_SYN, SYN_REPORT, 0);
     }
 }
