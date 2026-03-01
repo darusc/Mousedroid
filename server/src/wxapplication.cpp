@@ -50,6 +50,6 @@ void wxApplication::OnWindowCloseEvent(wxCloseEvent &evt)
         main_frame->Hide();
         server->Close();
         Logger::monitor->Destroy();
-        // main_frame->Destroy();
+        main_frame->Destroy();
     }
 }
