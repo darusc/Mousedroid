@@ -55,7 +55,6 @@ class ConnectionViewModel :
         sendEvent(Event.ConnectionFailed(connectionMode))
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     override fun onDisconnected(connectionMode: Connection.Mode, hostName: String) {
         // Hardware link was lost (e.g host device's bluetooth was turned off)
         setState(State.Idle)
@@ -85,7 +84,6 @@ class ConnectionViewModel :
      * or redirects to the bluetooth device list
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    @RequiresApi(Build.VERSION_CODES.P)
     fun startBluetoothMode(context: Context, afterEnableIntent: Boolean = false) {
         if (afterEnableIntent || BluetoothAdapterWrapper.getInstance()?.isEnabled!!) {
             connectionManager.registerBluetoothHID(context)
@@ -99,7 +97,6 @@ class ConnectionViewModel :
     /**
      * Should be called only when the user requests a manual disconnect
      */
-    @RequiresApi(Build.VERSION_CODES.P)
     fun disconnect() {
         viewModelScope.launch {
             connectionManager.disconnect()

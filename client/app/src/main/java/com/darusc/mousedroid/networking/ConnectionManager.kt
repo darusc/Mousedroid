@@ -78,7 +78,6 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
 
     override fun onBytesReceived(buffer: ByteArray, bytes: Int) {}
 
-    @RequiresApi(Build.VERSION_CODES.P)
     override fun onDisconnected(connectionMode: Connection.Mode, hostName: String) {
         disconnect()
         connectionStateCallback?.onDisconnected(connectionMode, hostName)
@@ -130,7 +129,6 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
     /**
      * Register the bluetooth HID profile
      */
-    @RequiresApi(Build.VERSION_CODES.P)
     fun registerBluetoothHID(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             btConn = BluetoothConnection(context, this@ConnectionManager)
@@ -140,7 +138,6 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
     /**
      * Connect in bluetooth mode
      */
-    @RequiresApi(Build.VERSION_CODES.P)
     fun connectBluetooth(macAddress: String) {
         connectionStateCallback?.onConnectionInitiated(Connection.Mode.BLUETOOTH)
         btConn?.connect(macAddress)
@@ -149,7 +146,6 @@ class ConnectionManager private constructor() : Connection.Listener, BatteryMoni
     /**
      * Close active connection
      */
-    @RequiresApi(Build.VERSION_CODES.P)
     fun disconnect() {
         CoroutineScope(Dispatchers.IO).launch {
             connected = false

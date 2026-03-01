@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 @SuppressLint("MissingPermission") // For BLUETOOTH_CONNECT permission
-@RequiresApi(Build.VERSION_CODES.P)
 class BluetoothConnection(
     context: Context,
     private val listener: Listener

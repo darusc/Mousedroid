@@ -1,52 +1,83 @@
-# Build it
+# Building Mousedroid Server
+
+Mousedroid uses a cross-platform CMake build system. Follow the instructions below based on your operating system.
+
+---
 
 ## Prerequisites
 
-### Windows
+### **Windows (Visual Studio + vcpkg)**
+* **IDE:** [Visual Studio 2022/2026](https://visualstudio.microsoft.com/vs/) with the **"Desktop development with C++"** workload.
+* **Package Manager:** [vcpkg](https://github.com/microsoft/vcpkg) is required for dependency management.
 
-- wxWidgets https://www.wxwidgets.org/downloads/. Build it yourself or use the prebuild binaries and add it to path as `WXWIN`. 
-  https://wiki.wxwidgets.org/Compiling_wxWidgets_with_MinGW <br>
-  https://wiki.wxwidgets.org/Compiling_and_getting_started
+### **Linux (Ubuntu/Debian)**
+* **Compiler:** GCC 11+ or Clang.
+* **Build Tools:** CMake and Make.
+* **Dependencies:** `asio` and `wxWidgets 3.3`.
 
-- ASIO https://think-async.com/Asio/. Download the library and add it to path as `ASIO`. Project is configured to use the standalone version, if you use the BOOST version you may need to change include paths.
+---
 
-- Android SDK Platform tools https://developer.android.com/tools/releases/platform-tools. For a wired connection adb is required. ADB binaries are also provided.
+## Build Instructions
 
+### **Windows**
 
-### Linux
+1.  **Install Dependencies via vcpkg** Open your terminal (PowerShell or CMD) and run:
+    ```powershell
+    vcpkg install asio:x64-windows wxwidgets:x64-windows
+    vcpkg integrate install
+    ```
 
-- wxWidgets https://www.wxwidgets.org/downloads/. Build it yourself or install the required packages:
-```
-libgtk-3-dev
-libwxgtk3.0-dev
-```
-- ASIO https://think-async.com/Asio/. Download the library and config the CMakeLists or install the `libasio-dev` package.
-- Android SDK Platform tools https://developer.android.com/tools/releases/platform-tools - install the ```android-platform-tools``` package.
+2.  **Open & Build in Visual Studio** * Open **Visual Studio**.
+    * Select **"Open a local folder"** and choose the Mousedroid project root.
+    * Visual Studio will detect `CMakeLists.txt`. 
+    * Set the configuration dropdown to **x64-Release**.
+    * Go to **Build > Build All**.
 
-## Build
-
-### Windows
-
-- First build the the `resource.rc`:
-```
-  windres resource.rc resource.o -I$(WXWIN)\include
-```
-- Build the `CMakeLists.txt`
-```
-  cmake -G"MinGW Makefiles" -B./cmake . 
-```
-- Run `make` in the `cmake` directory
-- Run the `install.bat` script
-- The built binaries are located in `build/bin`
-
-### Linux
-
-- Build the `CMakeLists.txt`
-```
-  cmake -B./cmake .
-```
-- Run `make` in the `cmake` directory
-- Run the `install.sh` script
-- The binary executable is located in `cmake/bin` and it's also installed in the system.
+3.  **Deploy** Run the deployment script to collect the executable and its dependencies into the `mousedroid_win64/` folder:
+    ```powershell
+    ./release.bat
+    ```
 
 
+
+---
+
+### **Linux**
+
+1.  **Install Dependencies** Install the required development packages via `apt`:
+    ```bash
+    sudo apt update
+    sudo apt install build-essential cmake libwxgtk3.3-dev libasio-dev adb
+    ```
+
+2.  **Configure & Compile** Use the standard CMake out-of-source build workflow:
+    ```bash
+    cmake -B"cmake" -DCMAKE_BUILD_TYPE=Release
+    cd cmake
+    make
+    ```
+
+3.  **System Installation** Run the installation script to set up `uinput` permissions (allowing mouse control without root) and create the desktop launcher:
+    ```bash
+    cd ..
+    chmod +x release.sh
+    ./release.sh
+
+    chmod +x install.sh
+    ./install.sh
+    ```
+
+
+
+---
+
+## 🔍 Troubleshooting
+
+| Issue | Platform | Solution |
+| :--- | :--- | :--- |
+| **Missing DLLs** | Windows | Ensure `install.bat` was run to copy vcpkg DLLs to the executable folder. |
+| **Mouse not moving** | Linux | Ensure `install.sh` was run and you have restarted your session to apply udev rules. |
+| **No Tray Icon** | Linux | If using Wayland, tray icons may be hidden. Try switching to an X11 session. |
+| **vcpkg Triplets** | Windows | Ensure you are targeting `x64-windows`. Use `vcpkg install ...:x86-windows` if you need 32-bit. |
+
+---

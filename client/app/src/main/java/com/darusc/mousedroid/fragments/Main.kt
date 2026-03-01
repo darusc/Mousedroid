@@ -157,7 +157,6 @@ class Main : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     override fun onDestroy() {
         super.onDestroy()
         viewModel.disconnect()
