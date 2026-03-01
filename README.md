@@ -1,49 +1,95 @@
-<h1  align="center">
+<h1 align="center">
   <sub>
-    <img  src="imgs/logo.png"  width=200></img>
+    <img src="imgs/logo.png" width="150">
   </sub>
+  <br>
+  Mousedroid
 </h1>
 
-<p align="center">Use your android phone as a mouse & keyboard.</p>
+<p align="center">Transform your Android phone into a high-performance cross-platform mouse & keyboard.</p>
 
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width=170>](https://apt.izzysoft.de/fdroid/index/apk/com.darusc.mousedroid)
-
-![GitHub License](https://img.shields.io/github/license/darusc/mousedroid?style=for-the-badge)
-![GitHub Release](https://img.shields.io/github/v/release/darusc/mousedroid?style=for-the-badge)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/darusc/mousedroid/total?style=for-the-badge)
-[<img src="https://shields.rbtlog.dev/simple/com.darusc.mousedroid" alt="RB shield">](https://shields.rbtlog.dev/com.darusc.mousedroid)
+<p align="center">
+  <a href="https://github.com/darusc/mousedroid/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/darusc/mousedroid?style=for-the-badge" alt="License">
+  </a>
+  <a href="https://github.com/darusc/mousedroid/releases">
+    <img src="https://img.shields.io/github/v/release/darusc/mousedroid?style=for-the-badge" alt="Release">
+  </a>
+  <a href="https://github.com/darusc/mousedroid/releases">
+    <img src="https://img.shields.io/github/downloads/darusc/mousedroid/total?style=for-the-badge" alt="Downloads">
+  </a>
+  <a href="https://apt.izzysoft.de/fdroid/index/apk/com.darusc.mousedroid">
+    <img src="https://img.shields.io/badge/IzzyOnDroid-Repo-blue?style=for-the-badge" alt="IzzyOnDroid">
+  </a>
+</p>
 
 ## Description
 
-Cross platform application that transforms your android phone in an input peripheral. Use it as a mouse (touchpad), keyboard or numpad. Wired or wirelessly, control your pc with your phone.
+Mousedroid is a versatile, cross-platform application that turns your Android phone into a remote input peripheral. Control your PC or laptop with a precision touchpad, a full QWERTY keyboard, or a dedicated numpad. Whether you're navigating a media center from the couch or need an emergency mouse, Mousedroid works seamlessly over Wi-Fi, Bluetooth, or USB.
 
-### Supported platforms:
-- Windows
-- Linux
-- Android 8 (Oreo) and newer
+### Supported Platforms
+* **PC:** Windows 10/11 and Linux (Ubuntu 22.04+ recommended).
+* **Phone:** Android 9.0 and newer.
 
-## How to use
-1. [Download](https://github.com/darusc/Mousedroid/releases) the available binaries or build and install the server on your pc ([How to build](https://github.com/hypertensiune/Mousedroid/tree/master/server)).
-2. [Download](https://github.com/darusc/Mousedroid/releases) and install the APK on your phone.
-3. If you want to use the application in ***WIFI*** mode, make sure your phone is connected to the same network as the pc. <br>
-   If you want to use it ***wired***, you must enable `USB Debugging` under `Developer options` on your phone. ([See](https://developer.android.com/tools/adb) for more details)
-4. Start the server. (If you start the server after connecting your phone via USB you need to restart ADB)
-5. For ***WIFI*** mode add the IP Address of your server and connect to it.
+## Key Features
 
-## Gestures
-| Action         | Gesture     |
-| -------------- | ----------- |
-| Click          | Tap the screen once          |
-| Double click   | Double tap the screen        |
-| Right click    | Tap the screen once with two fingers
-| Scroll         | Place two fingers on the screen and slide horizontally or vertically
-| Drag & drop    | Long press and drag |
-| Zoom           | Pinch & zoom |
+* **Three Connection Modes:** 
+    * **Bluetooth:** Direct pairing for a cable-free experience without needing a shared network.
+    * **Wi-Fi:** Wireless freedom across your local network.
+    * **USB (Wired):** Near-zero latency using ADB.
+* **Full Input Suite:** Switch between a responsive Touchpad, a full Keyboard, and a Numpad.
+* **Smart Gestures:** Multi-touch support for right-clicking, scrolling, and zooming.
+* **Cross-Platform:** Native server support for both Windows and Linux users.
 
+## Gestures Guide
 
-## Notes
+| Action | Gesture |
+| :--- | :--- |
+| **Left Click** | Tap the screen once |
+| **Double Click** | Double tap the screen |
+| **Right Click** | Tap the screen once with two fingers |
+| **Scroll** | Slide two fingers horizontally or vertically |
+| **Drag & Drop** | Long press and drag |
+| **Zoom** | Pinch & zoom |
 
-- For Android versions greater than 31 (Android 12L and newer) the app requires bluetooth permission to display the bluetooth name set by the user.
-- If you start the server after connecting your phone via USB you need to restart ADB.
-- On Wayland some features, like the taskbar icon may not be visible, switching to Xorg might solve the issue.
-- For linux the app, development and tests were done on a **Ubuntu 22.04 virtual machine**. There might be some differences when run on a non-virtual machine intallation
+---
+
+## How to Use
+
+### 1. Download & Install
+* **On PC:** [Download](https://github.com/darusc/mousedroid/releases) the latest binaries for your OS.
+* **On Android:** [Download](https://github.com/darusc/mousedroid/releases) and install the APK.
+
+### 2. Choose Your Connection
+* **Bluetooth Mode:** Pair your phone and PC via system Bluetooth settings. 
+* **Wi-Fi Mode:** Ensure both devices are on the same network. Enter the PC's IP address into the app and connect.
+* **Wired (USB) Mode:** 
+1. Enable **USB Debugging** in your phone's Developer Options.
+2. Connect via USB cable.
+3. Start the server. (If the server was already running, you may need to restart the ADB service in the server settings).
+
+---
+
+## Troubleshooting & Notes
+
+### Connection Issues
+* **Firewall:** On Windows, ensure `Mousedroid.exe` is allowed through the Firewall for both **Private** and **Public** networks.
+* **Host Unreachable:** If using Wi-Fi, verify that "AP Isolation" is disabled in your router settings.
+* **USB Not Detected:** Check your cable and ensure your PC recognizes the phone via `adb devices`.
+
+### Linux Specifics
+* **Wayland vs Xorg:** Some features, like the taskbar icon, may not be visible on Wayland. Switching to Xorg typically resolves this.
+* **Permissions:** If the mouse doesn't move on Linux, ensure you ran the `install.sh` script to set up the necessary `uinput` permissions.
+
+### Bluetooth Support
+* For the best experience on modern Android versions, grant the requested Bluetooth permissions so the desktop server can correctly display your device's friendly name.
+
+---
+
+## Reporting Issues
+
+If you encounter a bug or crash, please open a [New Issue](https://github.com/darusc/mousedroid/issues). 
+**Please include:**
+* Your PC Operating System (e.g., Windows 11, Ubuntu 22.04).
+* Your Phone Model and Android Version.
+* The connection method you were using when the issue occurred.
