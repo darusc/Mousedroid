@@ -1,5 +1,7 @@
 package com.darusc.mousedroid.mkinput
 
+import com.darusc.mousedroid.layouts.KeyboardLayout
+
 sealed class InputEvent {
 
     enum class MouseButton {
@@ -26,7 +28,7 @@ sealed class InputEvent {
     data class MouseDragState(val button: MouseButton, val isDown: Boolean) : InputEvent() // For DOWN/UP dragging
     data class Zoom(val scale: Int) : InputEvent()
 
-    data class KeyPress(val modifier: Byte, val code: Byte) : InputEvent()
+    data class KeyPress(val keyList: List<KeyboardLayout.Key>) : InputEvent()
     data class NumpadKeyPress(val key: Byte): InputEvent()
 
     data class MediaEvent(val action: MediaAction): InputEvent()
