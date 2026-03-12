@@ -50,7 +50,10 @@ class TCPConnection(
     }
 
     override fun send(event: InputEvent) {
-        socket.getOutputStream().write(event.toSocketReport())
+        val reportList = event.toSocketReport()
+        reportList.forEach {
+            socket.getOutputStream().write(it)
+        }
     }
 
     fun sendBytes(bytes: ByteArray) {

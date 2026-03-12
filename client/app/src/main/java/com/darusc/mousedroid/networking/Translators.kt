@@ -109,10 +109,12 @@ fun InputEvent.toHIDReport(): Array<HIDReport> {
         }
 
         is InputEvent.KeyPress -> {
-            arrayOf(
-                KeyboardReport(this.modifier, this.code),
-                KeyboardReport(0, 0)
-            )
+            val reports = mutableListOf<KeyboardReport>()
+            keyList.forEach {
+                reports.add(KeyboardReport(it.modifier, it.code))
+                reports.add(KeyboardReport(0, 0))
+            }
+            reports.toTypedArray()
         }
 
         is InputEvent.Zoom -> {
@@ -147,51 +149,57 @@ fun InputEvent.toHIDReport(): Array<HIDReport> {
     }
 }
 
+private fun socketReport(vararg bytes: Byte): Array<ByteArray> {
+    return arrayOf(byteArrayOf(*bytes))
+}
+
 /**
  * Translate the input event to raw socket bytes
  */
-fun InputEvent.toSocketReport(): ByteArray {
+fun InputEvent.toSocketReport(): Array<ByteArray> {
     return when (this) {
         is InputEvent.MouseMove -> {
-            byteArrayOf(RawSocketEvents.MOVE, this.dx.toByte(), this.dy.toByte())
+            socketReport(RawSocketEvents.MOVE, this.dx.toByte(), this.dy.toByte())
         }
 
         is InputEvent.MouseScroll -> {
             if (this.dy != 0) {
-                byteArrayOf(RawSocketEvents.SCROLL, (this.dy).toByte())
+                socketReport(RawSocketEvents.SCROLL, (this.dy).toByte())
             } else {
-                byteArrayOf(RawSocketEvents.SCROLL_H, (this.dx).toByte())
+                socketReport(RawSocketEvents.SCROLL_H, (this.dx).toByte())
             }
         }
 
         is InputEvent.MouseClick -> {
             val code =
                 if (this.button == InputEvent.MouseButton.LEFT) RawSocketEvents.LCLICK else RawSocketEvents.RCLICK
-            byteArrayOf(code)
+            socketReport(code)
         }
 
         is InputEvent.MouseDragState -> {
             val code = if (this.isDown) RawSocketEvents.DOWN else RawSocketEvents.UP
-            byteArrayOf(code)
+            socketReport(code)
         }
 
         is InputEvent.Zoom -> {
-            byteArrayOf(RawSocketEvents.ZOOM, this.scale.toByte())
+            socketReport(RawSocketEvents.ZOOM, this.scale.toByte())
         }
 
         is InputEvent.KeyPress -> {
-            byteArrayOf(RawSocketEvents.KEYPRESS, this.code, this.modifier)
+            keyList.map {
+                socketReport(RawSocketEvents.KEYPRESS, it.code, it.modifier)
+            }.toTypedArray()
         }
 
         is InputEvent.NumpadKeyPress -> {
-            byteArrayOf(RawSocketEvents.KEYPRESS, this.key, 0x00)
+            socketReport(RawSocketEvents.KEYPRESS, this.key, 0x00)
         }
 
         is InputEvent.MediaEvent -> {
             val bitmask = getMediaActionHIDBitmask(this.action)
-            byteArrayOf(RawSocketEvents.MEDIA, (bitmask and 0xFF).toByte())
+            socketReport(RawSocketEvents.MEDIA, (bitmask and 0xFF).toByte())
         }
 
-        is InputEvent.BatteryEvent -> { byteArrayOf() }
-    }
+        is InputEvent.BatteryEvent -> { socketReport() }
+    } as Array<ByteArray>
 }

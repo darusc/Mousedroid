@@ -40,7 +40,6 @@ class Main : Fragment() {
     private val viewModel: ConnectionViewModel by activityViewModels()
 
     @SuppressLint("MissingPermission")
-    @RequiresApi(Build.VERSION_CODES.P)
     private val enableBluetoothLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
@@ -66,7 +65,6 @@ class Main : Fragment() {
         return binding.root
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

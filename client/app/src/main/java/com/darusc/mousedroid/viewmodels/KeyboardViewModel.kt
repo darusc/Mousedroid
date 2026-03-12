@@ -42,7 +42,7 @@ class KeyboardViewModel : BaseViewModel<KeyboardViewModel.State, KeyboardViewMod
         for (char in chars) {
             val mapping = activeKeyboardLayout.getMapping(char)
             if (mapping != null) {
-                connectionManager.send(InputEvent.KeyPress(mapping.modifier, mapping.code))
+                connectionManager.send(InputEvent.KeyPress(mapping))
             }
         }
     }

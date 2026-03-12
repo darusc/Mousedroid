@@ -16,12 +16,12 @@ abstract class KeyboardLayout {
      * Mapping of unicode characters to corresponding
      * keyboard keycodes and modifier
      */
-    protected abstract val charMap: Map<Char, Key>
+    protected abstract val charMap: Map<Char, List<Key>>
 
     /**
      * Get the keycode and modifier required for a given ascii character
      */
-    fun getMapping(c: Char): Key? {
+    fun getMapping(c: Char): List<Key>? {
         return charMap[c]
     }
 }
