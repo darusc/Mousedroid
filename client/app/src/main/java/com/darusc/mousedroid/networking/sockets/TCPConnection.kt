@@ -53,6 +53,10 @@ class TCPConnection(
         val reportList = event.toSocketReport()
         reportList.forEach {
             socket.getOutputStream().write(it)
+            // Send data immediately and add a small delay, otherwise all bytes will be merged
+            // (fix for multiple keypress events for one character)
+            socket.getOutputStream().flush()
+            Thread.sleep(10)
         }
     }
 

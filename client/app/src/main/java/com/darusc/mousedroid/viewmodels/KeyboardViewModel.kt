@@ -1,6 +1,8 @@
 package com.darusc.mousedroid.viewmodels
 
 import com.darusc.mousedroid.layouts.KeyboardLayout
+import com.darusc.mousedroid.layouts.languages.KeyboardLayoutES
+import com.darusc.mousedroid.layouts.languages.KeyboardLayoutFR
 import com.darusc.mousedroid.layouts.languages.KeyboardLayoutRO
 import com.darusc.mousedroid.layouts.languages.KeyboardLayoutUS
 import com.darusc.mousedroid.mkinput.InputEvent
@@ -15,7 +17,9 @@ class KeyboardViewModel : BaseViewModel<KeyboardViewModel.State, KeyboardViewMod
 
     private val layoutMap: Map<String, Class<out KeyboardLayout>> = mapOf(
         KeyboardLayoutUS.NAME to KeyboardLayoutUS::class.java,
-        KeyboardLayoutRO.NAME to KeyboardLayoutRO::class.java
+        KeyboardLayoutES.NAME to KeyboardLayoutES::class.java,
+        KeyboardLayoutFR.NAME to KeyboardLayoutFR::class.java,
+        KeyboardLayoutRO.NAME to KeyboardLayoutRO::class.java,
     )
 
     val layouts: Set<String>
