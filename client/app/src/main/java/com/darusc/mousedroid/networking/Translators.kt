@@ -150,7 +150,7 @@ fun InputEvent.toHIDReport(): Array<HIDReport> {
 }
 
 private fun socketReport(vararg bytes: Byte): Array<ByteArray> {
-    return arrayOf(byteArrayOf(*bytes))
+    return arrayOf(bytes)
 }
 
 /**
@@ -186,8 +186,10 @@ fun InputEvent.toSocketReport(): Array<ByteArray> {
         }
 
         is InputEvent.KeyPress -> {
-            keyList.map {
-                socketReport(RawSocketEvents.KEYPRESS, it.code, it.modifier)
+            keyList.flatMap {
+                listOf(
+                    byteArrayOf(RawSocketEvents.KEYPRESS, it.code, it.modifier)
+                )
             }.toTypedArray()
         }
 
@@ -201,5 +203,5 @@ fun InputEvent.toSocketReport(): Array<ByteArray> {
         }
 
         is InputEvent.BatteryEvent -> { socketReport() }
-    } as Array<ByteArray>
+    }
 }

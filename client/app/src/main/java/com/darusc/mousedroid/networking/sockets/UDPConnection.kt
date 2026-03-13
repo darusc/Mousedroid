@@ -39,8 +39,12 @@ class UDPConnection(
 
     override fun send(event: InputEvent) {
         try {
-            val bytes = event.toSocketReport()
-            socket.send(DatagramPacket(bytes, bytes.size, address, port))
+            val reportList = event.toSocketReport()
+            reportList.forEach {
+                socket.send(DatagramPacket(it, it.size, address, port))
+                // Delay similar to HID polling rate
+                Thread.sleep(15)
+            }
         } catch (_: Exception) {}
     }
 
