@@ -6,7 +6,6 @@ mkdir -p mousedroid_linux
 # Copy binary and assets to local dist
 cp cmake/bin/Mousedroid mousedroid_linux/
 cp icon.png mousedroid_linux/
-cp -r adb/* mousedroid_linux/adb/ 2>/dev/null || echo "No ADB folder found, skipping..."
 
 # Generate config.ini inside dist
 cat <<EOF > mousedroid_linux/config.ini

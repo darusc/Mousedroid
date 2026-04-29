@@ -124,7 +124,7 @@ void SettingsManager::ADBOn()
         //a = system("adb reverse tcp:6969 tcp:6969");        
         bAdbStarted = adb::start(6969);
     #else
-        a = system("./adb reverse tcp:6969 tcp:6969");
+        a = system("adb reverse tcp:6969 tcp:6969");
         if(a == 0)
         {
             LOG("ADB Server [PORT 6969] STARTED");
@@ -143,7 +143,7 @@ void SettingsManager::ADBOff()
             //int a = system("adb reverse --remove-all");
             adb::kill(6969);
         #else
-            int a = system("./adb reverse --remove-all");
+            int a = system("adb reverse --remove-all");
             LOG("ADB Server [PORT 6969] STOPPED");
         #endif
         bAdbStarted = false;
