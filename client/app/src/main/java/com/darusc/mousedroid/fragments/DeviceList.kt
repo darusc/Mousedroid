@@ -20,6 +20,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -48,7 +49,8 @@ class DeviceList : Fragment() {
         get() = arguments?.getSerializable("CONNECTION_MODE") as Connection.Mode
 
     private val connectionViewModel: ConnectionViewModel by activityViewModels()
-    private val deviceListViewModel: DeviceListViewModel by activityViewModels {
+    // Each device-list destination has its own connection mode and data source.
+    private val deviceListViewModel: DeviceListViewModel by viewModels {
         if(connectionMode == Connection.Mode.BLUETOOTH) {
             val devices = BluetoothAdapterWrapper.getInstance()?.pairedDevices ?: emptySet()
             DeviceListViewModel.Factory(devices)
