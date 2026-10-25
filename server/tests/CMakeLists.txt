@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.16)
+project(MousedroidSettingsTests LANGUAGES CXX)
+enable_testing()
+add_executable(settingsfile_test settingsfile_test.cpp)
+target_compile_features(settingsfile_test PRIVATE cxx_std_17)
+add_test(NAME settingsfile COMMAND settingsfile_test)

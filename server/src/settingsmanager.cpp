@@ -1,9 +1,17 @@
 #include "settingsmanager.h"
 
 #include "adb.hpp"
+#include "settingsfile.h"
 
 SettingsManager::SettingsManager() : bAdbStarted(false)
 {
+    #ifdef _WIN32
+        configPath = SettingsFile::ExecutableConfigPath();
+    #else
+        // Preserve the existing Linux configuration location.
+        configPath = "config.ini";
+    #endif
+
     #ifdef _WIN32
         char buff[128] = { 0 };
         DWORD buffSize = sizeof(buff);
@@ -18,19 +26,7 @@ SettingsManager::SettingsManager() : bAdbStarted(false)
 
 void SettingsManager::LoadConfigs()
 {
-    std::ifstream fin("config.ini");
-
-    std::string line;
-    while(std::getline(fin, line))
-    {
-        size_t pos = line.find('=');
-        std::string setting = line.substr(0, pos);
-        std::string value = line.substr(pos + 1);
-
-        settings[setting] = value; 
-    }
-
-    fin.close();
+    SettingsFile::Load(configPath, settings);
 
     InputManager::MOVE_SENSITIVITY = std::atoi(settings["MOVE_SENSITIVITY"].c_str());
     InputManager::SCROLL_SENSITIVITY = std::atoi(settings["SCROLL_SENSITIVITY"].c_str());
@@ -38,11 +34,8 @@ void SettingsManager::LoadConfigs()
 
 void SettingsManager::SaveConfigs()
 {
-    std::ofstream fout("config.ini");
-    for(auto &pair : settings)
-    {
-        fout << pair.first << "=" << pair.second << "\n";
-    }
+    if (!SettingsFile::Save(configPath, settings))
+        LOG("[CONFIG] Could not save settings to ", configPath.u8string());
 }
 
 void SettingsManager::SetRunAtStartup(bool enabled)

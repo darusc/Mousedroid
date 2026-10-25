@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <filesystem>
 
 #include "input/inputmanager.hpp"
 #include "logger.h"
@@ -32,7 +33,7 @@ class SettingsManager
         bool ADBState();
 
     private:
-        std::ifstream fin;
+        std::filesystem::path configPath;
         std::map<std::string, std::string> settings;
 
         bool bRunAtStartup;

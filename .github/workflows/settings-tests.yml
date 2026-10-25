@@ -1,0 +1,19 @@
+name: Settings regression tests
+on:
+  push:
+    paths: ['server/src/settingsfile.h', 'server/src/settingsmanager.*', 'server/tests/**', '.github/workflows/settings-tests.yml']
+  pull_request:
+    paths: ['server/src/settingsfile.h', 'server/src/settingsmanager.*', 'server/tests/**', '.github/workflows/settings-tests.yml']
+permissions:
+  contents: read
+jobs:
+  settings:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S server/tests -B build/settings-tests
+      - run: cmake --build build/settings-tests --config Release
+      - run: ctest --test-dir build/settings-tests -C Release --output-on-failure
